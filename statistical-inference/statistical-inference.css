@@ -89,3 +89,24 @@ label.slider {
 .hover { 
 	background-color: #eee; 
 }
+
+//Extra stuff from Mike Bostock
+.line {
+	stroke: #aaa;
+	stroke-width: 1.5px;
+	stroke-linecap: round;
+	transition: all 500ms linear;
+}
+
+.line--active {
+	stroke: #f00;
+	stroke-width: 3px;
+}
+
+.line--inactive {
+	stroke: #000;
+}
+
+.line--temp {
+	stroke: #aaa;
+}
