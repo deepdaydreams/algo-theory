@@ -334,7 +334,7 @@ var gLine_is = svg_is.append("g")
 gLine_is.selectAll("line")
     .data(array_is)
   .enter().append("line")
-    .attr("class", "line--inactive")
+    .attr("class", "line--temp")
     .attr("transform", transform_is)
     .attr("y2", -height_is);
 
@@ -344,7 +344,7 @@ p_is.append("button")
 whenFullyVisible(p_is.node(), click_is);
 
 function click_is() {
-  var actions = quicksort(array_is.slice()).reverse();
+  var actions = insertion_sort(array_is.slice()).reverse();
 
   var line = gLine_is.selectAll("line")
       .attr("transform", transform_is)
@@ -385,15 +385,18 @@ function transform_is(d, i) {
 }
 
 //TODO: replace this with an insertion sort visualization
-function quicksort(array) {
+function insertion_sort(array) {
   var actions = [];
 
-  function partition(left, right, pivot) {
-    var v = array[pivot];
-    swap(pivot, --right);
-    for (var i = left; i < right; ++i) if (array[i] < v) swap(i, left++);
-    swap(left, right);
-    return left;
+  for (var i = 1; i < array.length; i++) {
+    var x = array[i];
+    var j = i - 1;
+    while (j >= 0 && array[j] > x) {
+      swap(j, j + 1);
+      j = j - 1;
+      actions.push({type: "partition", "pivot":j + 1, "left": 0, "right": i + 1});
+    }
+    array[j + 1] = x;
   }
 
   function swap(i, j) {
@@ -404,16 +407,5 @@ function quicksort(array) {
     actions.push({type: "swap", "0": i, "1": j});
   }
 
-  function recurse(left, right) {
-    if (left < right - 1) {
-      var pivot = (left + right) >> 1;
-      actions.push({type: "partition", "left": left, "pivot": pivot, "right": right});
-      pivot = partition(left, right, pivot);
-      recurse(left, pivot);
-      recurse(pivot + 1, right);
-    }
-  }
-
-  recurse(0, array.length);
   return actions;
 }
