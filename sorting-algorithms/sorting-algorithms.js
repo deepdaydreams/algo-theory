@@ -1,4 +1,5 @@
-//Handles functionality of Statistical Inference
+//Handles functionality of Sorting Algorithms
+//Credit to Mike Bostock for much of the code
 
 function whenBoundsVisible(computeBounds, callback) {
     var id = ".visible-" + ++count,

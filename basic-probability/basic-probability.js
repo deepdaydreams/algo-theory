@@ -1,33 +1,6 @@
-//Handles functionality of Probability
-$(window).load(function () {
-    drawCoin();
-    drawDie();
-    // drawPi();
-});
-
-//Handles Window Resize
-$(window).on("resize", function () {
-    drawCoin();
-    drawDie();
-    // drawPi();
-});
-
-//Handles CSS animation for coin and die
-//Adapted from http://jsfiddle.net/byrichardpowell/38MGS/1/
-$.fn.animatecss = function(anim, time, cb) {
-    if (time) this.css('-webkit-transition', time / 1000 + 's');
-    this.addClass(anim);
-    if ($.isFunction(cb)) {
-        setTimeout(function() {
-            $(this).each(cb);         
-        }, (time) ? time : 250);
-    }
-    return this;
-};
-
 
 //*******************************************************************************//
-//Likelihood
+//Stack
 //*******************************************************************************//
 //Constants
 var probTheo = [0.5,0.5];
@@ -36,8 +9,125 @@ var coinData = [{data:[{value:countCoin[0],side:'head'},{value:countCoin[1],side
 				{data:[{value:probTheo[0],side:'head'},{value:probTheo[1],side:'tail'}],state:'Theoretical'}];
 
 //Create SVG
-var svgCoin = d3.select("#barCoin").append("svg");
 
+//2 different data arrays
+//Hack to make 
+var dataArray1 = [10,10,10,10,10];
+var dataArray2 = [50,55,45,35,20,25,25,40];
+var array = [-1, -1, -1, -1, -1]; //start small for now
+
+//globals
+var dataIndex=1;
+var xBuffer=50;
+var yBuffer=100;
+var lineLength=200;
+var countStack = 0;
+var arrStart = 0;
+var arrEnd = 0;
+
+
+//create main svg element
+var svgDoc = d3.select("#barCoin")
+	.append("svg")
+
+var containerCoin = svgDoc.append('g')
+	.attr("width", 400)
+	.attr("height", 200);
+
+//create axis line
+svgDoc.append("line")
+	.attr("x1",xBuffer)
+	.attr("y1",yBuffer)
+	.attr("x1",xBuffer+lineLength)
+	.attr("y2",yBuffer)
+
+//create basic circles
+containerCoin.selectAll("circle")
+	.data(array)
+	.enter()
+	.append("circle")
+	.attr("cx",function(d,i){
+		//var spacing = lineLength/(eval("dataArray"+dataIndex).length);
+		var spacing = lineLength/(arrEnd - arrStart + 1); //padding is helpful
+		return xBuffer+(i*spacing)
+	})
+	.attr("cy",yBuffer)
+	.attr("r",function(d,i){ 
+		if (d === -1) return 0;
+		else return d;
+	})
+	.attr('fill', 'teal');
+
+//button to swap over datasets
+$('#flipOne').click(function() {
+	//select new data
+	if (arrEnd - arrStart >= array.length) {
+		return; //this means the array is full
+	}
+	while (array[arrEnd % (array.length)] >= 0) {
+		arrStart += 1;
+		arrEnd += 1;
+	}
+	array[arrEnd % (array.length)] = 20;
+	
+	//rejoin data
+	var circle = containerCoin.selectAll("circle")
+		.data(array);
+
+	//update all circles to new positions
+	circle.transition()
+		.duration(500)
+		.attr("cx",function(d,i){
+			//var spacing = lineLength/(trueLen + 1);
+			//var mod = (i - arrEnd) % array.length;
+			var mod = (i - arrStart) % array.length;
+			if (mod < 0) mod += array.length;
+			//console.log(d,i, mod);
+			return xBuffer + mod *50;
+		})
+		.attr("cy",yBuffer)
+		.attr("r",function(d,i){
+			var mod = i;
+			if (mod < 0) mod += array.length;
+			var temp = array[mod];
+			if (temp < 0) return 0;
+			else return temp;
+		})
+	arrEnd += 1;
+});//end click function
+
+//Flip once
+
+$('#flipHundred').click(function() {
+	var circle = containerCoin.selectAll("circle")
+		.data(array);
+
+	if (arrEnd - arrStart <= 0) {
+		return; //too small
+	}
+
+	//update all circles to new positions
+	//NOTE TO SELF: in order for this to work properly, the references have to be
+	//correct. Hence the real solution is to use an array as a queue in secret. 
+	arrStart += 1;
+	circle.transition()
+		.duration(500)
+		.attr("cx",function(d,i){
+			var mod = (i - arrStart) % array.length;
+			if (mod < 0) mod += array.length;
+			if (mod === array.length - 1) return xBuffer; //delete first in place
+			return xBuffer + mod *50;
+		})
+		.attr("cy",yBuffer)
+		.attr("r",function(d,i){
+			if (i === (arrStart - 1 + array.length) % array.length) {
+				array[i] = -1;
+			}
+			return array[i] < 0 ? 0 : array[i];
+		});
+});
+
+/*
 //Create Container
 var containerCoin = svgCoin.append('g');
 
@@ -181,6 +271,7 @@ function drawCoin(){
 	//Update Rectangles
 	updateCoin();
 }
+*/
 
 //*******************************************************************************//
 //Expectation
