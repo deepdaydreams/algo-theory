@@ -121,19 +121,17 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-4">
-                    <h1>Likelihood</h1>
+                    <h1>Queue</h1>
                     <hr>
-                    <p>Probability is the measure of the likelihood that an event will occur. It is quantified as a number between 0 and 1, where 0 indicates impossibility and 1 indicates certainty. A simple example is the tossing of a coin that has two sides: head and tail. We can describe the probability of this event in terms of the observed outcomes or the expected results.</p>
+                    <p>A queue is what's known as a first in first out (FIFO) data structure. It supports two operations: dequeueing, i.e. removing and retrieving the front of the queue, and enqueueing, i.e. adding to the back of the queue. Try pressing the enqueue and dequeue buttons below to get a feel for this data structure. 
                     <div id="coinWrapper">
-                        <div id="coin"></div>
                         <div id="coinButtons">
-                            <div class="btn btn-default" id="flipOne">Flip the Coin</div>
-                            <div class="btn btn-default" id="flipHundred">Flip 100 times</div>
+                            <div class="btn btn-default" id="enqueue">Enqueue</div>
+                            <div class="btn btn-default" id="dequeue">Dequeue</div>
                         </div>
                     </div>
-                    <p>For a "fair" coin, the probability of head equals the probability of tail. However, for an "unfair" or "weighted" coin the two outcomes are not equally likely. Change the "weight" of the coin by dragging and dropping the expected probability and see how this affects the observed outcomes.</p>
                 </div>
-                <div id="barCoin" class="col-xs-8">
+                <div id="queue" class="col-xs-8">
                 </div>
             </div>
         </div>
@@ -151,19 +149,16 @@
                 <div id="plotDie" class="col-xs-8">     
                 </div>
                 <div class="col-xs-4">
-                    <h1>Expectation</h1>
+                    <h1>Stack</h1>
                     <hr>
-                    <p>The expected value of an experiment is the probability-weighted average of all possible values.  It is defined mathematically as the following:</p>
-                    $$E[X] = \sum_{x \in X}xP(x)$$
-                    <p>The law of large numbers states that the average result from a series of trials will converge to the expected value. Roll the die to see convergence to its expected value.</p>
+                    <p>A stack is a last-in first-out (LIFO) data structure. It supports two operations: pushing, i.e. putting a new element into the stack, and popping, i.e. removing the last element from the stack. Try pressing the push and pop buttons to get a feel for how the stack works. 
+                    </p>
                     <div id="dieWrapper">
-                        <div id="die"></div>
                         <div id="dieButtons">
-                            <div class="btn btn-default" id="rollOne">Roll the Die</div>
-                            <div class="btn btn-default" id="rollHundred">Roll 100 times</div>
+                            <div class="btn btn-default" id="rollOne">Push</div>
+                            <div class="btn btn-default" id="rollHundred">Pop</div>
                         </div>
                     </div>
-                    <p>Change the theoretical probability of the die to see how that changes the average and expected value.</p>
                     <div id="barDie"></div>
                 </div>
             </div>
@@ -230,8 +225,9 @@
         </div>
     </section>
 
-    <!-- D3 -->
-    <script src="../js/d3.min.js"></script>
+    <!-- D3 with nodes-->
+    <script src="../js/d3.min.js"></script> 
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.js"></script> -->
 
     <!-- jQuery -->
     <script src="../js/jquery.js"></script>
