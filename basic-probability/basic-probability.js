@@ -187,31 +187,43 @@ $('#rollHundred').click(function() {
 
 var treeData = [
   {
-    "name": "Top Level",
+    "name": 135,
     "parent": "null",
+	"id": 1,
     "children": [
       {
-        "name": "Level 2: A",
-        "parent": "Top Level",
+        "name": 246,
+        "parent": 1,
+		"id": 2, 
         "children": [
           {
-            "name": "Son of A",
-            "parent": "Level 2: A"
+            "name": 468,
+            "parent": 2, 
+        	"id": 4, 
           },
           {
-            "name": "Daughter of A",
-            "parent": "Level 2: A"
+            "name": 579,
+            "parent": 2, 
+        	"id": 5, 
           }
         ]
       },
       {
-        "name": "Level 2: B",
-        "parent": "Top Level"
+        "name": 357,
+        "parent": 1,
+        "id": 3, 
       }
     ]
   }
 ];
+//for a heap, we can represent the nodes two different ways: using an array
+//and also in the more visually appealing max heap tree
+//Note that with the array approach, we can find the first available space
+//And then backtrack from there
 
+//var treeData=[{'name': 1, 'parent': 'null'}];
+var treeData = [];
+var treeArray = [{}]; //keep one empty element in treeArray
 
 // ************** Generate the tree diagram	 *****************
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -220,7 +232,7 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
 
 var i = 0,
 	duration = 750,
-	root;
+	root = null;
 
 var tree = d3.layout.tree()
 	.size([height, width]);
@@ -234,22 +246,25 @@ var svg = d3.select("#estSvg").append("svg")
   .append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-root = treeData[0];
-root.x0 = height / 2;
-root.y0 = 0;
-
-update(root);
+if (treeData.length > 0) {
+}
 
 d3.select(self.frameElement).style("height", "500px");
 
 function update(source) {
+  if (root === null) {
+  }
 
   // Compute the new tree layout.
   var nodes = tree.nodes(root).reverse(),
 	  links = tree.links(nodes);
 
-  // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 180; });
+  var maxDepth = 0;
+  //Find max depth
+  nodes.forEach(function(d) { maxDepth = maxDepth > d.depth?maxDepth:d.depth});
+
+  // Normalize for fixed-depth. 
+  nodes.forEach(function(d) { d.y = d.depth * 400/(maxDepth + 1); });
 
   // Update the nodes…
   var node = svg.selectAll("g.node")
@@ -259,18 +274,22 @@ function update(source) {
   var nodeEnter = node.enter().append("g")
 	  .attr("class", "node")
 	  .attr("transform", function(d) { return "translate(" + source.x0 + "," + source.y0 + ")"; })
-	  .on("click", click);
+	  .attr("id", function(d) {return 'node' + d.id})
+	  .on("click", click)
+	  .on("contextmenu", function(d) {swapNodes(d.parent, d);});
+  console.log(nodeEnter);
 
   nodeEnter.append("circle")
 	  .attr("r", 1e-6)
 	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeEnter.append("text")
-	  .attr("y", function(d) { return d.children || d._children ? -13 : 13; })
 	  .attr("dy", ".35em")
-	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+	  .attr("text-anchor", "middle")
 	  .text(function(d) { return d.name; })
 	  .style("fill-opacity", 1e-6);
+	  //.attr("y", function(d) { return d.children || d._children ? -13 : 13; })
+	  //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
@@ -278,7 +297,7 @@ function update(source) {
 	  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeUpdate.select("circle")
-	  .attr("r", 10)
+	  .attr("r", 15)
 	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeUpdate.select("text")
@@ -331,6 +350,7 @@ function update(source) {
 
 // Toggle children on click.
 function click(d) {
+  /*
   if (d.children) {
 	d._children = d.children;
 	d.children = null;
@@ -338,8 +358,122 @@ function click(d) {
 	d.children = d._children;
 	d._children = null;
   }
+  */
+  d.children = [{'name': d.id * 15, 'id': 2 * d.id}]
   update(d);
 }
+
+// Swap parent and child
+function swapNodes(node1, node2){
+  //console.log(node1, node2);
+  var g1 = svg.select("#node" + node1.id);
+  var g2 = svg.select("#node" + node2.id);
+  //The most important part is to make the text label swap happen. 
+  var g1Start = g1.select('text').text();
+  var g2Start = g2.select('text').text();
+  //https://stackoverflow.com/questions/44495524/d3-transition-not-working-with-events
+  //There is an issue here which I don't think I really understand, 
+  //Namely the difference between transition and selection listeners.(on vs each)
+  g1.select('text').transition()
+	.duration(500)
+	.attr("transform", "translate(" + (node2.x - node1.x) + ', ' + (node2.y - node1.y) + ')')
+	.each('end', function(d) {
+		g1.select('text').attr('transform','translate(0, 0)').text(g2Start);
+	});
+  //g1.select('text').on('click', () => {console.log('hello!')});
+  g2.select('text').transition()
+	.duration(500)
+	.attr("transform", "translate(" + (node1.x - node2.x) + ', ' + (node1.y - node2.y) + ')')
+	.each('end', function(d) {
+		g2.select('text').attr('transform','translate(0, 0)').text(g1Start);
+	});
+	
+  g1.select('circle').transition()
+    .duration(500)
+    .attr("transform", "translate(" + (node2.x - node1.x) + ', ' + (node2.y - node1.y) + ')')
+	.each('end', function(d) {
+		g1.select('circle').attr('transform', 'translate(0,0)');
+	});
+  g2.select('circle').transition()
+    .duration(500)
+    .attr("transform", "translate(" + (node1.x - node2.x) + ', ' + (node1.y - node2.y) + ')')
+	.each('end', function(d) {
+		g2.select('circle').attr('transform', 'translate(0,0)');
+	});
+  //TODO: make sure the links and nodes reflect this change!!! (update parents and children)
+  var temp = node1.name;
+  node1.name = node2.name;
+  node2.name = temp;
+}
+
+var totalNodes = 1;
+$('#dropHundred').click(function() { //inserts a node
+	//basic idea behind inserting a node:
+	//find the node immediately below you based on total # of nodes
+	//then adjust until you satisfy the max heap property
+	//
+	var newNode = {'name': totalNodes, 'parent': Math.trunc(totalNodes/2), 'id': totalNodes};
+	if (totalNodes === 1) {
+		treeData = [{'name':1, 'parent':'null', 'id': 1}];
+		root = treeData[0];
+		root.x0 = height / 2;
+		root.y0 = 0;
+		treeArray = [{}, {'name':1, 'parent':'null', 'id': 1}];
+	} else {
+		var curNode = treeData[0];
+		var cur = 1;
+		var curIndex = 1;
+		while (cur <= totalNodes) {
+			cur *= 2;
+		}
+		cur = Math.trunc(cur/4); //ignore second leading digit
+		//console.log(cur, curNode, totalNodes, cur & totalNodes);
+		while (cur > 1) {
+			if (!curNode.hasOwnProperty('children')) {
+				break; //we can't continue further
+			}
+			if ((cur & totalNodes) > 0) {
+				curNode = curNode.children[1];
+				curIndex = curIndex * 2 + 1;
+			} else {
+				curNode = curNode.children[0];
+				curIndex = curIndex * 2;
+			}
+			cur = Math.trunc(cur/2);
+			//console.log(cur, curNode, totalNodes, cur & totalNodes);
+		}
+		if (curNode.hasOwnProperty('children')) {
+			curNode.children.push(newNode);
+			curIndex = curIndex * 2 + 1;
+		} else {
+			curNode.children = [newNode];
+			curIndex = curIndex * 2;
+		}
+		if (curIndex >= treeArray.length) {
+			treeArray.push(newNode);
+		} else {
+			treeArray[curIndex] = newNode; //hopefully this should work??
+		}
+		//console.log(curIndex, treeArray);
+	}
+	update(root);
+	//obey max heap property
+	/*
+	if (totalNodes > 1) {
+		curNode = newNode;
+		console.log(curNode, newNode);
+		console.log(treeArray);
+		while ((curNode.parent !== 'null') && (curNode.parent.name < curNode.name)) {
+			
+			console.log('while loop reached');
+			swapNodes(curNode.parent, curNode);
+			curNode = curNode.parent;
+		}
+	}
+	*/
+	totalNodes += 1;
+});
+
  
 /*
 var textSpacing = 40;
