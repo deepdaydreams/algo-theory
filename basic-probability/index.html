@@ -37,7 +37,7 @@
 
     <!-- Off Canvas Menu -->
     <nav id="offCanvasMenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation">
-      <a class="navmenu-brand" href="../index.html"><b>Seeing Theory</b></a>
+      <a class="navmenu-brand" href="../index.html"><b>Algo Theory</b></a>
       <ul class="nav navmenu-nav">
         <li class="active"><a href="../basic-probability/index.html">Basic Probability</a></li>
         <li><a href="../compound-probability/index.html">Compound Probability</a></li>
@@ -84,27 +84,27 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12">
-                    <h1>Basic Probability</h1>
-                    <p class="text-center">Basic probability is an introduction to the foundational ideas in probability theory.</p>
+                    <h1>Data Structures</h1>
+                    <p class="text-center">Data structures are some of the most foundational knowledge every computer scientist must know. The most simple, of course, is the array: a contiguous series of equally sized blocks of memory which can be easily indexed. Oftentimes using the right data structure can make a hard algorithmic problem much, much easier. Here we showcase three: the stack, the queue, and the heap. </p>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xs-4">
                     <a class="page-scroll" href="#first">
                         <div class="icon" id="likelihood_img"></div>
-                        <h3>Likelihood</h3>
+                        <h3>Queue</h3>
                     </a>
                 </div>
                 <div class="col-xs-4">
                     <a class="page-scroll" href="#second">
                         <div class="icon" id="expectation_img"></div>
-                        <h3>Expectation</h3>
+                        <h3>Stack</h3>
                     </a>
                 </div>
                 <div class="col-xs-4">
                     <a class="page-scroll" href="#third">
                         <div class="icon" id="estimation_img"></div>
-                        <h3>Estimation</h3>
+                        <h3>Heap</h3>
                     </a>
                 </div>
             </div>
@@ -175,48 +175,9 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-4">
-                    <h1>Estimation</h1>
+                    <h1>Heaps</h1>
                     <hr>
-                    <p>One of the main goals of statistics is to estimate unknown parameters. An estimator uses measurements and properties of expectation to approximate these parameters. To illustrate this idea we will estimate the value of pi, \( \pi \) by dropping randomly samples on a square that inscribes a circle.  We will define the following estimator \( \hat{\pi} \), where \( m \) is the number of samples within our circle and \( n \) is the total number of samples dropped.</p>
-                    <table id="estimation" class="table table-bordered">
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <tbody>
-                            <tr>
-                                <td>\(\hat{\pi} = 4\dfrac{m}{n}\)</td>
-                                <td>
-                                    \( m= \) <span id="m">0.00</span><br>
-                                    \( n= \) <span id="n">0.00</span>
-                                </td>
-                                <td>\( \hat{\pi}= \) <span id="pi">&emsp;&emsp;&emsp;&emsp;</span></td>
-                            </tr>
-                        </tbody>
-                    </table>         
-                    <div class="btn btn-default" id="dropHundred">Drop 100 Samples</div>
-                    <div class="btn btn-default" id="dropThousand">Drop 1000 Samples</div>
-                    <p style="margin-top:10px">An estimator's accuracy and precision is quantified by the following properties:</p>
-                    <div id='properties'>
-                        <label class="radio-inline"><input type="radio" name="estProp" value='bias'>Bias</label>
-                        <label class="radio-inline"><input type="radio" name="estProp" value='var'>Variance</label>
-                        <label class="radio-inline"><input type="radio" name="estProp" value='mse'>Mean Squared Error</label>
-                    </div>
-                    <div class='estProperties' id='bias'>
-                        <p>The bias of an estimator is the difference between the estimator's expected value and the true value of the parameter being estimated. It informally measures how accurate an estimator is. For an estimator \( \theta \), bias is defined mathematically as:</p>
-                        $$B(\hat{\theta}) = E(\hat{\theta}) - \theta$$
-                        <p>In our example, \( \hat{\pi} \) is unbiased, which means its bias is 0.</p>
-                        
-                    </div>
-                    <div class='estProperties' id='var'>
-                        <p>Variance is the expectation of the squared deviation of an estimator from its expected value. It informally measures how precise an estimator is. For an estimator \( \theta \), this is defined mathematically as:</p>
-                        $$var(\hat{\theta}) = E[(\hat{\theta} - E(\hat{\theta}))^2]$$
-                        <p>In our example, the variance of our estimator \( \hat{\pi} \) is <span id='varValue'></span></p>
-                    </div>
-                    <div class='estProperties' id='mse'>
-                        <p>Mean squared error (MSE) of an estimator is the sum of the estimator's variance and bias squared. For an estimator \( \theta \), this is defined mathematically as:</p>
-                        $$MSE(\hat{\theta}) = var(\hat{\theta}) + B(\hat{\theta})^2$$
-                        <p>In our example, the mean squared error of our estimator \( \hat{\pi} \) is <span id='mseValue'></span></p>
-                    </div>
+                    <p>Trees are data structures in which every element contains some number of "child" elements, which the tree can access as its descendants. Heaps are a special type of tree in which either all elements are greater than their children--so called max heaps--or all elements are greater than their children--so called min heaps. In the accompanying illustration, we show how a max heap can be used to sort an array. 
                 </div>
                 <div class="col-xs-8">
                     <div id="estSvg"></div>
@@ -226,8 +187,7 @@
     </section>
 
     <!-- D3 with nodes-->
-    <script src="../js/d3.min.js"></script> 
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.js"></script>
 
     <!-- jQuery -->
     <script src="../js/jquery.js"></script>

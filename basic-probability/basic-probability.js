@@ -185,297 +185,40 @@ $('#rollHundred').click(function() {
 //Heap visualization
 //*******************************************************************************//
 
-var treeData = [
-  {
-    "name": 135,
-    "parent": "null",
-	"id": 1,
-    "children": [
-      {
-        "name": 246,
-        "parent": 1,
-		"id": 2, 
-        "children": [
-          {
-            "name": 468,
-            "parent": 2, 
-        	"id": 4, 
-          },
-          {
-            "name": 579,
-            "parent": 2, 
-        	"id": 5, 
-          }
-        ]
-      },
-      {
-        "name": 357,
-        "parent": 1,
-        "id": 3, 
-      }
-    ]
-  }
-];
-//for a heap, we can represent the nodes two different ways: using an array
-//and also in the more visually appealing max heap tree
-//Note that with the array approach, we can find the first available space
-//And then backtrack from there
+var arr = [ 99,
+94,
+81,
+75,
+86,
+98,
+98,
+34,
+52,
+28,
+35,
+33, 0, 22]// 15, 4, 6 , 1 ,23 ]//, 21, 30, 21, 40, 292, 32, 49]
 
-//var treeData=[{'name': 1, 'parent': 'null'}];
-var treeData = [];
-var treeArray = [{}]; //keep one empty element in treeArray
 
-// ************** Generate the tree diagram	 *****************
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
-	width = 960 - margin.right - margin.left,
-	height = 500 - margin.top - margin.bottom;
+arr = makeRandArray(15)
 
-var i = 0,
-	duration = 750,
-	root = null;
+var duration = 500; // 700 a good moderate speed
+var colorduration = 100;
+var textTransDuration = 700;
+var swapDelay = 500;
+var textRemoveDuration = 3000;
+var swapDelay = 1000;
+var compareDuration = 3000;
+var addColorDuration = 1000;
 
-var tree = d3.layout.tree()
-	.size([height, width]);
+var margin = {top: 50, right: 0, bottom: 30, left: 0},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
-var diagonal = d3.svg.diagonal()
-	.projection(function(d) { return [d.x, d.y]; });
+var svg = d3.select("#estSvg")
+        .append("svg")
+        .attr("width", width + margin.right + margin.left)
+        .attr("height", height + margin.top + margin.bottom)
 
-var svg = d3.select("#estSvg").append("svg")
-	.attr("width", width + margin.right + margin.left)
-	.attr("height", height + margin.top + margin.bottom)
-  .append("g")
-	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-if (treeData.length > 0) {
-}
-
-d3.select(self.frameElement).style("height", "500px");
-
-function update(source) {
-  if (root === null) {
-  }
-
-  // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
-	  links = tree.links(nodes);
-
-  var maxDepth = 0;
-  //Find max depth
-  nodes.forEach(function(d) { maxDepth = maxDepth > d.depth?maxDepth:d.depth});
-
-  // Normalize for fixed-depth. 
-  nodes.forEach(function(d) { d.y = d.depth * 400/(maxDepth + 1); });
-
-  // Update the nodes…
-  var node = svg.selectAll("g.node")
-	  .data(nodes, function(d) { return d.id || (d.id = ++i); });
-
-  // Enter any new nodes at the parent's previous position.
-  var nodeEnter = node.enter().append("g")
-	  .attr("class", "node")
-	  .attr("transform", function(d) { return "translate(" + source.x0 + "," + source.y0 + ")"; })
-	  .attr("id", function(d) {return 'node' + d.id})
-	  .on("click", click)
-	  .on("contextmenu", function(d) {swapNodes(d.parent, d);});
-  console.log(nodeEnter);
-
-  nodeEnter.append("circle")
-	  .attr("r", 1e-6)
-	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
-
-  nodeEnter.append("text")
-	  .attr("dy", ".35em")
-	  .attr("text-anchor", "middle")
-	  .text(function(d) { return d.name; })
-	  .style("fill-opacity", 1e-6);
-	  //.attr("y", function(d) { return d.children || d._children ? -13 : 13; })
-	  //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-
-  // Transition nodes to their new position.
-  var nodeUpdate = node.transition()
-	  .duration(duration)
-	  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-  nodeUpdate.select("circle")
-	  .attr("r", 15)
-	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
-
-  nodeUpdate.select("text")
-	  .style("fill-opacity", 1);
-
-  // Transition exiting nodes to the parent's new position.
-  var nodeExit = node.exit().transition()
-	  .duration(duration)
-	  .attr("transform", function(d) { return "translate(" + source.x + "," + source.y + ")"; })
-	  .remove();
-
-  nodeExit.select("circle")
-	  .attr("r", 1e-6);
-
-  nodeExit.select("text")
-	  .style("fill-opacity", 1e-6);
-
-  // Update the links…
-  var link = svg.selectAll("path.link")
-	  .data(links, function(d) { return d.target.id; });
-
-  // Enter any new links at the parent's previous position.
-  link.enter().insert("path", "g")
-	  .attr("class", "link")
-	  .attr("d", function(d) {
-		var o = {x: source.x0, y: source.y0};
-		return diagonal({source: o, target: o});
-	  });
-
-  // Transition links to their new position.
-  link.transition()
-	  .duration(duration)
-	  .attr("d", diagonal);
-
-  // Transition exiting nodes to the parent's new position.
-  link.exit().transition()
-	  .duration(duration)
-	  .attr("d", function(d) {
-		var o = {x: source.x, y: source.y};
-		return diagonal({source: o, target: o});
-	  })
-	  .remove();
-
-  // Stash the old positions for transition.
-  nodes.forEach(function(d) {
-	d.x0 = d.x;
-	d.y0 = d.y;
-  });
-}
-
-// Toggle children on click.
-function click(d) {
-  /*
-  if (d.children) {
-	d._children = d.children;
-	d.children = null;
-  } else {
-	d.children = d._children;
-	d._children = null;
-  }
-  */
-  d.children = [{'name': d.id * 15, 'id': 2 * d.id}]
-  update(d);
-}
-
-// Swap parent and child
-function swapNodes(node1, node2){
-  //console.log(node1, node2);
-  var g1 = svg.select("#node" + node1.id);
-  var g2 = svg.select("#node" + node2.id);
-  //The most important part is to make the text label swap happen. 
-  var g1Start = g1.select('text').text();
-  var g2Start = g2.select('text').text();
-  //https://stackoverflow.com/questions/44495524/d3-transition-not-working-with-events
-  //There is an issue here which I don't think I really understand, 
-  //Namely the difference between transition and selection listeners.(on vs each)
-  g1.select('text').transition()
-	.duration(500)
-	.attr("transform", "translate(" + (node2.x - node1.x) + ', ' + (node2.y - node1.y) + ')')
-	.each('end', function(d) {
-		g1.select('text').attr('transform','translate(0, 0)').text(g2Start);
-	});
-  //g1.select('text').on('click', () => {console.log('hello!')});
-  g2.select('text').transition()
-	.duration(500)
-	.attr("transform", "translate(" + (node1.x - node2.x) + ', ' + (node1.y - node2.y) + ')')
-	.each('end', function(d) {
-		g2.select('text').attr('transform','translate(0, 0)').text(g1Start);
-	});
-	
-  g1.select('circle').transition()
-    .duration(500)
-    .attr("transform", "translate(" + (node2.x - node1.x) + ', ' + (node2.y - node1.y) + ')')
-	.each('end', function(d) {
-		g1.select('circle').attr('transform', 'translate(0,0)');
-	});
-  g2.select('circle').transition()
-    .duration(500)
-    .attr("transform", "translate(" + (node1.x - node2.x) + ', ' + (node1.y - node2.y) + ')')
-	.each('end', function(d) {
-		g2.select('circle').attr('transform', 'translate(0,0)');
-	});
-  //TODO: make sure the links and nodes reflect this change!!! (update parents and children)
-  var temp = node1.name;
-  node1.name = node2.name;
-  node2.name = temp;
-}
-
-var totalNodes = 1;
-$('#dropHundred').click(function() { //inserts a node
-	//basic idea behind inserting a node:
-	//find the node immediately below you based on total # of nodes
-	//then adjust until you satisfy the max heap property
-	//
-	var newNode = {'name': totalNodes, 'parent': Math.trunc(totalNodes/2), 'id': totalNodes};
-	if (totalNodes === 1) {
-		treeData = [{'name':1, 'parent':'null', 'id': 1}];
-		root = treeData[0];
-		root.x0 = height / 2;
-		root.y0 = 0;
-		treeArray = [{}, {'name':1, 'parent':'null', 'id': 1}];
-	} else {
-		var curNode = treeData[0];
-		var cur = 1;
-		var curIndex = 1;
-		while (cur <= totalNodes) {
-			cur *= 2;
-		}
-		cur = Math.trunc(cur/4); //ignore second leading digit
-		//console.log(cur, curNode, totalNodes, cur & totalNodes);
-		while (cur > 1) {
-			if (!curNode.hasOwnProperty('children')) {
-				break; //we can't continue further
-			}
-			if ((cur & totalNodes) > 0) {
-				curNode = curNode.children[1];
-				curIndex = curIndex * 2 + 1;
-			} else {
-				curNode = curNode.children[0];
-				curIndex = curIndex * 2;
-			}
-			cur = Math.trunc(cur/2);
-			//console.log(cur, curNode, totalNodes, cur & totalNodes);
-		}
-		if (curNode.hasOwnProperty('children')) {
-			curNode.children.push(newNode);
-			curIndex = curIndex * 2 + 1;
-		} else {
-			curNode.children = [newNode];
-			curIndex = curIndex * 2;
-		}
-		if (curIndex >= treeArray.length) {
-			treeArray.push(newNode);
-		} else {
-			treeArray[curIndex] = newNode; //hopefully this should work??
-		}
-		//console.log(curIndex, treeArray);
-	}
-	update(root);
-	//obey max heap property
-	/*
-	if (totalNodes > 1) {
-		curNode = newNode;
-		console.log(curNode, newNode);
-		console.log(treeArray);
-		while ((curNode.parent !== 'null') && (curNode.parent.name < curNode.name)) {
-			
-			console.log('while loop reached');
-			swapNodes(curNode.parent, curNode);
-			curNode = curNode.parent;
-		}
-	}
-	*/
-	totalNodes += 1;
-});
-
- 
-/*
 var textSpacing = 40;
 var arrtext = svg.append("g").attr("class", 'arrtext')
 
@@ -500,12 +243,14 @@ var arrtextg = arrtext.selectAll('.eletext').data(arr).enter().append('g')
 arrtextg.append('rect', ':first-child')
       .attr('width', function(d, i){
 //          console.log('this = ', this, 'd = ', d)
-          return 20
+          return 20;
         })
-      .attr('height', 20)
+      .attr('height', 20 + 8)
       .attr('transform', 'translate(0, -15)')
       .attr('fill', 'none')
       .attr('opacity', .4)
+      .attr('x', -6)
+      .attr('y', -6);
 //        .transition(duration * 100)
   //      .attr('fill', 'white')
 
@@ -518,8 +263,8 @@ arrtextg.append('text')
       .attr('id', function(d, i){
             return 'arrText' + i;
       })
-      .attr('stroke', 'grey')
-      .attr('fill', 'black')
+      .attr('fill', 'black');//
+      //.attr('stroke', 'grey')
 
 
 arrtext.append('text').text('')
@@ -527,8 +272,8 @@ arrtext.append('text').text('')
 
 arrtextg.attr('textbox', function(d){
 //  console.log('this arrtext = ', d3.select(this).select('text').node().getBBox().width)
-  var textW = d3.select(this).select('text').node().getBBox().width
-  d3.select(this).select('rect').attr('width', textW) 
+  var textW = d3.select(this).select('text').node().getBBox().width + 12;
+  d3.select(this).select('rect').attr('width', textW );
   return d3.select(this).select('text').node().getBBox().width;
 })
 
@@ -711,12 +456,14 @@ function update(data) {
 	   })
      .on('end', function(d){
 
+/*
          nodeUpdate.select('circle.node')
          .transition()
          .duration(addColorDuration)
          .style("fill", function(d) {
                      return "steelblue"//d._children ? "lightsteelblue" : "#fff";
                  })
+                 */
      })
 
   // Update the node attributes and style
@@ -748,7 +495,7 @@ function update(data) {
   nodeExit.select('text')
           .style('fill-opacity', 1e-6);
 
-	// Links section VVVVV
+	// ****************** links section ***************************
 
  // Update the links...
   var link = g.selectAll('path.link')
@@ -892,8 +639,7 @@ function max_heapify (ind, holders ){
 
 
     var comptext = 'compare the childrens';
-    anode
-	   .append('text')
+    anode.append('text')
        .text(comptext)
        .attr("text-anchor", function(d) {
              return 'middle'; })
@@ -957,11 +703,11 @@ function checkParentSwap(d, holders) {
 
   console.log('parent node id = ', pnode.attr('id'))
 
-  d3.select('.process')//.text('Compare with largest child')
+  d3.select('.process').text('Compare with largest child')
 
 
   if(d.data.name > d.parent.data.name){
-    d3.select('.process') //.text('Compare with largest child')
+    d3.select('.process').text('Compare with largest child')
       .transition()
       .duration(compareDuration)
       .delay(swapDelay)
@@ -1187,8 +933,6 @@ function changeRectColor(index, color) {
   d3.select('#artextg'+index).select('rect')
     .transition().duration(duration)
     .attr('fill', color)
-	//.attr('width', 20)
-	//.attr('height', 20)
 
 //  console.log('need to remove or change color of recs at right time still')
 }
@@ -1229,7 +973,7 @@ function swapArrayGs(ind1, ind2) {
 function updateRectSizes(){
   arrtextg.attr('textbox', function(d){
   //  console.log('this arrtext = ', d3.select(this).select('text').node().getBBox().width)
-    var textW = d3.select(this).select('text').node().getBBox().width
+    var textW = d3.select(this).select('text').node().getBBox().width + 12;
     d3.select(this).select('rect').attr('width', textW )
     return d3.select(this).select('text').node().getBBox().width;
   })
@@ -1324,8 +1068,8 @@ function popLargest(){
 function MakeRectDone(i){
   d3.select('#artextg'+i).select('rect')
     .transition().duration(duration)
-    .attr('fill', 'none')
-    .attr('stroke', "steelblue")
+    .attr('fill', 'grey');
+    //.attr('stroke', "steelblue")
 
 }
 
@@ -1336,4 +1080,4 @@ function makeRandArray(length){
   }
   return arrRand
 }
-*/
+
