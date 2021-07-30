@@ -1,306 +1,187 @@
-//Handles functionality of Distributions
-$(window).load(function () {
-  drawDist();
-  draw_sampling();
-  //drawCLT();
-});
-//Handles Window Resize
-$(window).on("resize", function () {
-	drawDist();
-  //drawCLT();
-});
-
-//Additional Functions to JSTAT
-
-jStat.binomialDiscrete = {};
-
-jStat.binomialDiscrete.pdf = function (k,n,p){
-	if (k<0 || !Number.isInteger(k) || k>n) {
-		return 0;
-	} else {
-		return jStat.binomial.pdf(k,n,p);
-	}
-}
-
-jStat.binomialDiscrete.cdf = function (k,n,p){
-	return jStat.binomial.cdf(k,n,p);
-}
-
-jStat.binomialDiscrete.mean = function (n,p){
-  return n*p;
-}
-
-jStat.bernoulli = {};
-
-jStat.bernoulli.pdf = function (k,p){
-	return jStat.binomialDiscrete.pdf(k,1,p);
-}
-
-jStat.bernoulli.cdf = function (k,p){
-	return jStat.binomial.cdf(k,1,p);
-}
-
-jStat.bernoulli.mean = function (p){
-  return p;
-}
-
-jStat.negbin.mean = function (r, p){
-  return (1-p)*r/p;
-}
-
-jStat.geometric = {};
-
-jStat.geometric.pdf = function (k,p){
-	if (k<0 || !Number.isInteger(k)) {
-		return 0;
-	} else {
-		return Math.pow(1-p,k)*p;
-	}
-}
-
-jStat.geometric.cdf = function (k,p){
-	if (k<0) {
-		return 0;
-	} else {
-		return 1-Math.pow(1-p, Math.floor(k)+1);
-	}
-}
-
-jStat.geometric.mean = function (p){
-  return (1-p) / p;
-}
-
-jStat.poisson.mean = function (lambda){
-  return lambda;
-}
-
 //*******************************************************************************//
 //Random Variable
 //*******************************************************************************//
 //Adapted from: https://bl.ocks.org/mbostock/5249328
 //              http://bl.ocks.org/mbostock/7833311
 
-var widthRV = 500,
-    heightRV = 500
-    radiusRV = 20,
-    borderRV = 1,
-    colors = ['#FF9B3C', '#00D0A2', '#64BCFF', '#FF4A3C', '#FFFF00', 
-              '#7272FF', '#55D733', '#1263D2', '#FF0080', '#A1FF00',
-              '#FF1300', '#03899C', '#FFC500', '#2419B2', '#4169E1'];
-
-
-var hexbin = d3.hexbin()
-    .size([widthRV, heightRV])
-    .radius(radiusRV);
-
-var svgRV = d3.select("#svgRV").append("svg")
-                  .attr("width", "100%")
-                  .attr("height", "100%")
-                  .attr("viewBox", "0 0 " + widthRV + " " + heightRV)
-                  .attr("preserveAspectRatio", "xMidYMid meet")
-
-
-$('#table').css('height', heightRV).css('overflow-y', 'auto');
-
-svgRV.append("path")
-    .attr("class", "mesh")
-    .attr("d", hexbin.mesh());
-
-var hexagon = svgRV.append("g")
-    .attr("class", "hexagon")
-  .selectAll("path")
-    .data(hexbin(hexbin.centers()))
-  .enter().append("path")
-    .attr("d", hexbin.hexagon(radiusRV - borderRV/2))//19.5
-    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-    .attr("id", function(d) { d.fixed = 0; d.value = 0; d.fill = 0; return 'bin-' + d.i + '-' + d.j; })
-    .on("mousedown", mousedown)
-    .on("mousemove", mousemove)
-    .on("mouseup", mouseup);
-
-// var border = svgRV.append("path")
-//     .attr("class", "border")
-//     .call(redrawRV);
-
-var mousing = 0;
-
-function mousedown(d) {
-  mousing = d.fill ? -1 : +1;
-  mousemove.apply(this, arguments);
-}
-
-function mousemove(d) {
-  if (mousing & (d.fixed == 0)) {
-    d3.select(this).classed("fill", d.fill = mousing > 0);
-    //border.call(redrawRV);
+var treeData = [
+  {
+    "name": "F4",
+    "parent": "null",
+    "children": [
+      {
+        "name": "F3",
+        "parent": "F4",
+        "children": [
+          {
+            "name": "F2",
+            "parent": "F3",
+            "children": [
+              {
+                "name": "F1",
+                "parent": "F2"
+              },
+              {
+                "name": "F0",
+                "parent": "F2"
+              }
+            ]
+          },
+          {
+            "name": "F1",
+            "parent": "F3"
+          }
+      ]
+      },
+      {
+        "name": "F2",
+        "parent": "F4",
+        "children": [
+          {
+            "name": "F1",
+            "parent": "F2"
+          },
+          {
+            "name": "F0",
+            "parent": "F2"
+          }
+        ]
+      },
+    ]
   }
-}
+];
 
-function mouseup() {
-  mousemove.apply(this, arguments);
-  mousing = 0;
-}
 
-//function redrawRV(border) {
-  //d3.selectAll('path.fill').style('stroke', "#000").style("stroke-width", borderRV);
-  //need to get neighbors...
-  //border.attr("d", hexagon(topojson.mesh(topology, topology.objects.hexagons, function(a, b) { return a.fill ^ b.fill; })));
-//}
+// ************** Generate the tree diagram	 *****************
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+	width = 960 - margin.right - margin.left,
+	height = 500 - margin.top - margin.bottom;
 
-function addColor(color, value) {
-  $('#rvMap').append("<tr>\
-    <td><img src='../img/hexagon.png' width='20px' style='background-color:" + color + "'/></td>\
-    <td>"+ value +"</td>\
-    </tr>");
-}
+var i = 0,
+	duration = 750,
+	root;
 
-function fixColor(color, value) {
-  hexagon.each(function(d){
-    if (d.fill) {
-      d.fill = 0;
-      d.value = value;
-      d.fixed = 1;
-      d3.select(this)
-        .classed("fill", 0)
-        .style("fill", color)
-        .style('stroke', color)
-        .style("stroke-width", borderRV);
-    }
+var tree = d3.layout.tree()
+	.size([height, width]);
+
+var diagonal = d3.svg.diagonal()
+	.projection(function(d) { return [d.x, d.y]; });
+
+var svg = d3.select("#svgRV").append("svg")
+	.attr("width", width + margin.right + margin.left)
+	.attr("height", height + margin.top + margin.bottom)
+  .append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+root = treeData[0];
+root.x0 = height / 2;
+root.y0 = 0;
+
+update(root);
+
+d3.select(self.frameElement).style("height", "500px");
+
+function update(source) {
+
+  // Compute the new tree layout.
+  var nodes = tree.nodes(root).reverse(),
+	  links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 140; });
+
+  // Update the nodes…
+  var node = svg.selectAll("g.node")
+	  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+	  .attr("class", "node")
+	  .attr("transform", function(d) { return "translate(" + source.x0 + "," + source.y0 + ")"; })
+	  .on("click", click);
+
+  nodeEnter.append("circle")
+	  .attr("r", 1e-6)
+	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeEnter.append("text")
+	  .attr("y", function(d) { return d.children || d._children ? -13 : 13; })
+	  .attr("dy", ".35em")
+	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+	  .text(function(d) { return d.name; })
+	  .style("fill-opacity", 1e-6);
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  nodeUpdate.select("circle")
+	  .attr("r", 10)
+	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeUpdate.select("text")
+	  .style("fill-opacity", 1);
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + source.x + "," + source.y + ")"; })
+	  .remove();
+
+  nodeExit.select("circle")
+	  .attr("r", 1e-6);
+
+  nodeExit.select("text")
+	  .style("fill-opacity", 1e-6);
+
+  // Update the links…
+  var link = svg.selectAll("path.link")
+	  .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+	  .attr("class", "link")
+	  .attr("d", function(d) {
+		var o = {x: source.x0, y: source.y0};
+		return diagonal({source: o, target: o});
+	  });
+
+  // Transition links to their new position.
+  link.transition()
+	  .duration(duration)
+	  .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+	  .duration(duration)
+	  .attr("d", function(d) {
+		var o = {x: source.x, y: source.y};
+		return diagonal({source: o, target: o});
+	  })
+	  .remove();
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+	d.x0 = d.x;
+	d.y0 = d.y;
   });
 }
 
-//Handle value submit
-$("#rvNewMap").submit(function(e) {
-  e.preventDefault();
-  if (colors.length) {
-    value = parseFloat($("#mapValue").val());
-    index = Math.floor(Math.random()*colors.length)
-    color = colors.splice(index, 1)[0];
-    addColor(color, value);
-    fixColor(color, value);
-  }
-  this.reset();
-});
-
-var sample;
-//Handles start and stop buttons
-$('.sampleBtns').on('click', function(){
-  var button = d3.select(this).attr('id');
-  if(button=='startRV') {
-    sample = setInterval(function() {
-              var randomX = Math.random()*widthRV,
-                  randomY = Math.random()*heightRV,
-                  pos = [randomX,randomY]
-                  bin = hexbin([pos]),
-                  hex = d3.select('#bin-' + bin[0].i + '-' + bin[0].j),
-                  color = hex.style('fill'),
-                  value = hex.data()[0].value;
-              addPoint(pos, color, value);
-            }, 100);
-  } else if(button=='stopRV') {
-    clearInterval(sample);
-  }
-  $('#startRV').toggle();
-  $('#stopRV').toggle(); 
-})
-
-
-Values = {};
-Frequency = {}
-//Add sample point
-function addPoint(pos, color, value) {
-  if (Values[value] == undefined) {
-    Values[value] = 1;
-    addRect(color, value);
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+	d._children = d.children;
+	d.children = null;
   } else {
-    Values[value] += 1;
-    updateRect();
-  };
-  svgRV.append('circle')
-      .attr('cx', pos[0])
-      .attr('cy', pos[1])
-      .attr('r', 5)
-      .style('fill', 'black')
-      .attr('opacity', '1')
-      .transition()
-      .style('fill', color)
-      .duration(1000)
-      .each('end', function(d){ d3.select(this).remove(); });
+	d.children = d._children;
+	d._children = null;
+  }
+  update(d);
 }
 
-
-//Tool Tip
-var tipRVD = d3.tip().attr('class', 'd3-tip')
-                      .offset([-10, 0])
-                      .html(function(d,i) { return round(d,2);});
-
-//Constants RV Dist
-var widthRVD = 350,
-    heightRVD = 200,
-    padRVD = 30;
-
-//Create SVG and SVG elements
-var svgRVD = d3.select("#rvDist")
-                  .append("svg")
-                  .attr("width", "100%")
-                  .attr("height", "100%")
-                  .attr("viewBox", "0 0 " + widthRVD + " " + heightRVD)
-                  .attr("preserveAspectRatio", "xMidYMid meet")
-                  .call(tipRVD);
-
-//Create Container
-var containerRVD = svgRVD.append("g").attr("transform", "translate(" + padRVD + "," + padRVD + ")");
-
-////xScale & yScale
-var xScaleRVD = d3.scale.ordinal().rangeRoundBands([0, widthRVD - 2*padRVD], .5);
-var yScaleRVD = d3.scale.linear().domain([0,1]).range([heightRVD - 2*padRVD, 0]);
-
-//xAxis
-var xAxisRVD = d3.svg.axis().scale(xScaleRVD).orient("bottom").ticks(0);
-var axisRVD = svgRVD.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(" + padRVD + "," + (heightRVD-padRVD) + ")")
-                    .call(xAxisRVD);
-//yAxis
-var yAxisRVD = d3.svg.axis().scale(yScaleRVD).orient("left").ticks(3);
-var axisYRVD = svgRVD.append("g")
-                    .attr("class", "y axis")
-                    .attr("transform", "translate(" + padRVD + "," + padRVD + ")")
-                    .call(yAxisRVD);
-
-//Add new bar and update axis
-function addRect(color, value) {
-  var key = Object.keys(Values);
-  var range = key.sort();
-
-  xScaleRVD.domain(range)
-  xAxisRVD.ticks(range.length);
-  axisRVD.call(xAxisRVD);
-
-  RVRects = containerRVD.selectAll("rect").data(key, function(d) { return d; });
-
-  RVRects.enter().append("rect")
-    .attr("id",function(d) {return 'bar'+d;})
-    .attr('fill', color)
-    .attr('stroke', 'black')
-    .on('mouseover', function(d){tipRVD.show(d,this)})
-    .on('mouseout', tipRVD.hide);
-
-  updateRect();
-}
-
-
-//Update Coin Bar Chart
-function updateRect() {
-  var n = Object.values(Values).reduce(function(a, b) { return a + b; }, 0);
-
-  containerRVD.selectAll("rect").transition()
-      .attr("x",function(d,i) {return xScaleRVD(d);})
-      .attr("y",function(d,i) {return yScaleRVD(Values[d]/n);})
-      .attr("height",function(d,i) {return yScaleRVD(1 - Values[d]/n);})
-      .attr("width",xScaleRVD.rangeBand());
-}
-
+//TODO: update so that all children are toggled beforehand
+ 
 
 //*******************************************************************************//
 //Discrete and Continuous

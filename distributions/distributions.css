@@ -1,41 +1,20 @@
 /*Random Variable*/
-.hexagon {
-  fill: white;
-  opacity: 0.6;
-  pointer-events: all;
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 3px;
 }
 
-.hexagon path {
-  -webkit-transition: fill 250ms linear;
-  transition: fill 250ms linear;
+.node text {
+  font: 12px sans-serif;
 }
 
-/*.hexagon :hover {
-  opacity: 0.5
-}*/
-
-.hexagon .fill {
-  fill: #c7c7c7;
-}
-
-.mesh {
+.link {
   fill: none;
-  stroke: #000;
-  stroke-opacity: .2;
-  pointer-events: none;
-}
-
-.border {
-  fill: none;
-  stroke: #000;
+  stroke: #ccc;
   stroke-width: 2px;
-  pointer-events: none;
 }
-
-#rvMap {
-  cursor: pointer;
-}
-
 
 /*Discrete and Continuous*/
 
