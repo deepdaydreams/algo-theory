@@ -127,47 +127,18 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-4">
-                    <h1>Set Theory</h1>
+                    <h1>Breadth First Search</h1>
                     <hr>
-                    <p>Set Theory is a branch of mathematics concerned with the description and definition of sets, which are collections of objects.  In the context of probability theory, we use set notation to describe compound events.  Below is a set calculator<sup>*</sup>.  Build a set by pressing on the different events and operators, then press submit to see your set highlighted in the Venn diagram.  You can also move and resize the circles by drag and drop.</p>
-                    <div id="setCalc">
-                        <div class="btn btn-default setItem">A</div>
-                        <div class="btn btn-default setItem">B</div>
-                        <div class="btn btn-default setItem">C</div>
-                        <div class="btn btn-default setItem">&empty;</div>
-                        <div class="btn btn-default setItem">U</div><br>
-                        <div class="btn btn-default setItem">(</div>
-                        <div class="btn btn-default setItem">&cap;</div>
-                        <div class="btn btn-default setItem">&cup;</div>
-                        <div class="btn btn-default setItem">'</div>
-                        <div class="btn btn-default setItem">)</div>
-                        <div class="form-control" id="set"></div>
-                        <div class="btn btn-default" id="submit">Submit</div>
-                        <div class="btn btn-default" id="delete">Delete</div>
-                        <div class="btn btn-default" id="reset">Reset</div>
-                    </div>
-                    <p>You might notice that certain combinations of sets and operators result in the same highlighted section in the Venn diagram. Set identities are laws of set theory that allow you to simplify set algebra. See the following link for a complete list of <a href='https://cs.brown.edu/courses/cs022/static/files/documents/sets.pdf'>set identities</a>.</p>
-                    <br>
-                    <p><sup>*Please note there are still some small errors in the calculator currently being fixed.</sup></p>
-
-                    <!-- Modal -->
-                    <div class="modal fade" id="myModal" role="dialog">
-                        <div class="modal-dialog modal-sm">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              <h4 class="modal-title">Invalid Set Notation</h4>
-                            </div>
-                            <div class="modal-body">
-                              <p class='text-center' id='invalidSet'></p>
-                            </div>
-                          </div>
+                    <p>In breadth first search, we exhaust all nodes of a particular depth from the start and repeat for increasing depth until we run out of nodes. In the example given, we see that breadth first search starts at the top node, and eventually propagates through the entire tree. Breadth first search is helpful for ensuring that every possibility at a given depth is explored before we move on, for example if we want to find all English words with length at most some integer n. </p>
+                    <div id="bfsWrapper">
+                        <div id="bfsButtons">
+                            <div class="btn btn-default" id="runbfs">Run Breadth First Search</div>
+                            <div class="btn btn-default" id="resetbfs">Reset</div>
                         </div>
                     </div>
-
                 </div>
                 <div class="col-xs-8">
-                    <div id="svgSet"></div>
+                    <div id="bfs-container"></div>
                 </div>
             </div>
         </div>
@@ -183,40 +154,17 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-8">
-                     <div id='svgComb'></div>
-                     <div class="button">
-                        <input id="number" data-slider-id="blueSlider" type="text" data-provide="slider" data-slider-ticks="[0,1]" data-slider-ticks-labels='["0","1"]' data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="0"data-slider-tooltip="hide">
-                    </div>
+                     <div id='dfs-container'></div>
                 </div>
                 <div class="col-xs-4">
-                    <h1>Combinatorics</h1>
+                    <h1>Depth First Search</h1>
                     <hr>
-                    <p>Combinatorics is a branch of mathematics concerned with counting sequences and sets of objects.  For example imagine we have a bag of uniquely colored marbles and I ask you to pick some number of the marbles at random without replacement. How many different sequences (permutations) of the marbles are there? How many different sets (combinations)?  Choose a size below representing the number of marbles in the bag. Then using the slider on the left visualize the number of permutations and combinations of marbles.</p>
-                    <div>
-<!--                       <select class="selectpicker" id="sizeComb">
-                        <option data-content="<div id='balls_1'></div>">1</option>
-                        <option data-content="<div id='balls_2'></div>">2</option>
-                        <option data-content="<div id='balls_3'></div>">3</option>
-                        <option data-content="<div id='balls_4'></div>">4</option>
-                      </select> -->
-                      <select class="form-control" id="sizeComb">
-                        <option data-content="<div id='balls_1'></div>">1</option>
-                        <option data-content="<div id='balls_2'></div>">2</option>
-                        <option data-content="<div id='balls_3'></div>">3</option>
-                        <option data-content="<div id='balls_4'></div>">4</option>
-                      </select>
-                    </div>
-                    <label class="radio-inline"><input type="radio" name="radioComb" checked="checked" value=false>Permutation</label>
-                    <label class="radio-inline"><input type="radio" name="radioComb" value=true>Combination</label>
-                    <div class='explanationComb'>
-                        <p>Permutations represent unique orderings of objects in a set.  We can determine the exact number of permutations with the following formula:</p>
-                        $$P(n,r) = \dfrac{n!}{(n-r)!}$$
-                        <p>\(n\) represents the total number of objects to pick from and \(r\) represents the number of objects being chosen.</p>
-                    </div>
-                    <div class='explanationComb' style='display:none'>
-                        <p>Combinations represent unique combinations of objects in a set.  We can determine the exact number of combinations with the following formula:</p>
-                        $$C(n,r) = \dfrac{n!}{r!(n-r)!}$$
-                        <p>\(n\) represents the total number of objects to pick from and \(r\) represents the number of objects being chosen.</p>
+                    <p>In depth first search, we exhaust a branch of a tree before we continue looking at other branches. In the example given, notice that the entire left branch is traversed before the right branches are examined. In fact, the order of how we check depth matters as well; in particular graphs, choosing random branches for depth first search as opposed to going in order as shown here can have, on average, much faster searches in many graphs.</p>
+                    <div id="dfsWrapper">
+                        <div id="dfsButtons">
+                            <div class="btn btn-default" id="rundfs">Run Depth First Search</div>
+                            <div class="btn btn-default" id="resetdfs">Reset</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -233,26 +181,17 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-4">
-                    <h1>Conditional Probability</h1>
+                    <h1>Dijkstra's Algorithm</h1>
                     <hr>
-                    <p>Conditional probability is a measure of the probability of an event given another event has occurred. It can be expressed mathematically as the following:</p>
-                    $$P(A|B) = \dfrac{P(A \cap B)}{P(B)}$$
-                    <p>To visualize this concept move and rescale the shelfs by drag and drop and toggle the current perspective.  What is the probability a ball lands on a shelf? What is the probability given the ball has or will hit another shelf?</p>
-                    <div id='svgProbCP'></div>
-                    <p>This visualization was adapted from Victor Powell's fantastic visualization of <a href="http://setosa.io/conditional/">conditional probability</a>.</p>
+                    <p>Dijkstra's algorithm seeks to find the shortest path from a given node in a graph and taking into account edge weights. This implementation stores nodes to visit, represented in pink, in a minimum heap and afterwards visits nodes in order of least cost, with visited nodes represented in red. Also known as Uniform Cost Search, it can also be used to find all shortest paths between all nodes.</p>
                 </div>
                 <div class="col-xs-8">
-                    <div id='svgBallCP'></div>
-                    <div id="ballControl">
-                        <div class="btn btn-default ballBtns" id="start" style="display:none">Start Ball Drop</div>
-                        <div class="btn btn-default ballBtns" id="stop">Stop Ball Drop</div>
-                    </div>
-                    <div id="perspectiveControl">
-                        <label>Perspective:</label>
-                        <div class="btn btn-default perspective" id="a">A</div>
-                        <div class="btn btn-default perspective" id="b">B</div>
-                        <div class="btn btn-default perspective" id="c">C</div>
-                        <div class="btn btn-default perspective active" id="universe">Universe</div>
+                    <div id='dijkstra-container'></div>
+                    <div id="dijkstraWrapper">
+                        <div id="dijkstraButtons">
+                            <div class="btn btn-default" id="rundijkstra">Run Dijkstra's Algorithm</div>
+                            <div class="btn btn-default" id="resetdijkstra">Reset</div>
+                        </div>
                     </div>
                 </div>
             </div>
