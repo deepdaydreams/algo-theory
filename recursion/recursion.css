@@ -99,25 +99,30 @@ label {
 
 
 /*Central Limit Theorem*/
-
-circle {
-  fill: #64bdff;
+#dfs-container{
+	display: block;
+	position: relative;
+	width: 60%;
+	margin-left: 28%;
+	height: 500px;
+	margin-top: 20px;
 }
 
-.bar rect {
-  fill: #00d0a1;
-  fill-opacity: 0.5;
+.nodeDfs {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
 }
 
-.bar text {
-  fill: black;
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
 }
 
-
-.normal {
-	fill: #00d0a1;
-}
-
-#dt {
-  width: 150px;
+.linkLabel {
+     /*font: 12px sans-serif;*/
+    stroke: #333;
+    stroke-width: 1;
+    fill: #fff;
 }

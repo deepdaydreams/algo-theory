@@ -5,50 +5,79 @@
 //              http://bl.ocks.org/mbostock/7833311
 
 var treeData = [
-  {
-    "name": "F4",
-    "parent": "null",
-    "children": [
-      {
-        "name": "F3",
-        "parent": "F4",
-        "children": [
-          {
-            "name": "F2",
-            "parent": "F3",
-            "children": [
-              {
-                "name": "F1",
-                "parent": "F2"
-              },
-              {
-                "name": "F0",
-                "parent": "F2"
-              }
-            ]
-          },
-          {
-            "name": "F1",
-            "parent": "F3"
-          }
-      ]
-      },
-      {
-        "name": "F2",
-        "parent": "F4",
-        "children": [
-          {
-            "name": "F1",
-            "parent": "F2"
-          },
-          {
-            "name": "F0",
-            "parent": "F2"
-          }
+  { 
+    'name': 'F5',
+    'parent': 'null',
+    'children': [
+    {
+      "name": "F4",
+      "parent": "null",
+      "children": [
+        {
+          "name": "F3",
+          "parent": "F4",
+          "children": [
+            {
+              "name": "F2",
+              "parent": "F3",
+              "children": [
+                {
+                  "name": "F1",
+                  "parent": "F2"
+                },
+                {
+                  "name": "F0",
+                  "parent": "F2"
+                }
+              ]
+            },
+            {
+              "name": "F1",
+              "parent": "F3"
+            }
         ]
-      },
+        },
+        {
+          "name": "F2",
+          "parent": "F4",
+          "children": [
+            {
+              "name": "F1",
+              "parent": "F2"
+            },
+            {
+              "name": "F0",
+              "parent": "F2"
+            }
+          ]
+        },
+      ]
+    }, {
+          "name": "F3",
+          "parent": "F5",
+          "children": [
+            {
+              "name": "F2",
+              "parent": "F3",
+              "children": [
+                {
+                  "name": "F1",
+                  "parent": "F2"
+                },
+                {
+                  "name": "F0",
+                  "parent": "F2"
+                }
+              ]
+            },
+            {
+              "name": "F1",
+              "parent": "F3"
+            }
+        ]
+        }
     ]
-  }
+ }
 ];
 
 
@@ -77,18 +106,33 @@ root = treeData[0];
 root.x0 = height / 2;
 root.y0 = 0;
 
-update(root);
+function toggleAll(d) {
+    if (d.children) {
+        if (d.name !== "green") {
+            d._children = d.children;
+            d._children.forEach(toggleAll);
+            d.children = null;
+        }
+        else
+            d.children.forEach(toggleAll);
+    }
+}
+
+//root.children.forEach(toggleAll);
+//toggleAll(root);
+
+update(root, 0);
 
 d3.select(self.frameElement).style("height", "500px");
 
-function update(source) {
+function update(source, delayTime) {
 
   // Compute the new tree layout.
   var nodes = tree.nodes(root).reverse(),
 	  links = tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 140; });
+  nodes.forEach(function(d) { d.y = d.depth * 100; });
 
   // Update the nodes…
   var node = svg.selectAll("g.node")
@@ -102,6 +146,7 @@ function update(source) {
 
   nodeEnter.append("circle")
 	  .attr("r", 1e-6)
+      .attr("id",function(d){return "node-dfs-"+d.id})
 	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeEnter.append("text")
@@ -114,6 +159,7 @@ function update(source) {
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
 	  .duration(duration)
+      .delay(delayTime)
 	  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeUpdate.select("circle")
@@ -126,6 +172,7 @@ function update(source) {
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
 	  .duration(duration)
+      .delay(delayTime)
 	  .attr("transform", function(d) { return "translate(" + source.x + "," + source.y + ")"; })
 	  .remove();
 
@@ -150,11 +197,13 @@ function update(source) {
   // Transition links to their new position.
   link.transition()
 	  .duration(duration)
+      .delay(delayTime)
 	  .attr("d", diagonal);
 
   // Transition exiting nodes to the parent's new position.
   link.exit().transition()
 	  .duration(duration)
+      .delay(delayTime)
 	  .attr("d", function(d) {
 		var o = {x: source.x, y: source.y};
 		return diagonal({source: o, target: o});
@@ -181,595 +230,272 @@ function click(d) {
 }
 
 //TODO: update so that all children are toggled beforehand
+// Do a dynamic programming style traversal through the tree as a test
+function visitElementDfs(element,animX){
+ // d3.select("#node-"+element.id).classed("visited",true);
+  d3.select("#node-dfs-"+element.id)
+    .transition().duration(animDuration).delay(animDuration*animX)
+    .style("fill","red").style("stroke","red");
+}
+
+function dft(){
+  var stack=[];
+  var animX=0;
+  stack.push(root);
+  while(stack.length!==0){
+    var element = stack.pop();
+    visitElementDfs(element,animX);
+    animX=animX+1;
+    if(element.children!==undefined){
+      for(var i=0; i<element.children.length; i++){
+        stack.push(element.children[element.children.length-i-1]);
+      }
+    }
+  }
+}
+
+dft();
+
  
 
 //*******************************************************************************//
 //Discrete and Continuous
 //*******************************************************************************//
 //Constants
-var xMax = [-40,40];
-var yMax = [0,5];
-var currentView = [-5,5];
 
-var parameters = {'bernoulli':['Probability'], 
-                  'binomialDiscrete':['Number','Probability'], 
-                  'negbin':['Number','Probability'], 
-				          'geometric':['Probability'], 
-                  'poisson':['Lambda'],
-                  'uniform':['Min','Max'], 
-                  'normal':['Mean','Std'], 
-                  'studentt':['Dof'], 
-                  'chisquare':['Dof'], 
-                  'exponential':['Lambda'], 
-                  'centralF': ['Dof1','Dof2'], 
-                  'gamma': ['Shape','Scale'], 
-                  'beta': ['Alpha','Beta']};
+var colors = ['#743720','#874D37','#826B42','#90A369','#ABBF83'];
+var colorrange = d3.scale.linear().domain([1,3,5,7,9]).range(colors);
 
-var initialParameters = {'bernoulli':[0.5], 
-                         'binomialDiscrete':[5,0.5], 
-                         'negbin':[5,0.5], 
-                         'geometric':[0.5], 
-                         'poisson':[5],
-						             'uniform':[-5,5], 
-                         'normal':[0,1], 
-                         'studentt':[5], 
-                         'chisquare':[5], 
-                         'exponential':[1], 
-                         'centralF':[5,5], 
-                         'gamma': [1,1], 
-                         'beta': [1,1]};
+var marginRecur = {top: 20, right: 10, bottom: 20, left: 10};
+var vizWidth = $('#graphDist').width();
+var widthRecur = vizWidth - marginRecur.left - marginRecur.right,
+    heightRecur = 500 - marginRecur.top - marginRecur.bottom;
+var svgRecur = d3.select('#graphDist').append('svg')
+  .attr('width', widthRecur + marginRecur.left + marginRecur.right)
+  .attr('height', heightRecur + marginRecur.top + marginRecur.bottom)
+.append('g')
+  .attr('transform', 'translate(' + (widthRecur/2 - 40) + ',' + (heightRecur - 100) + ')')
+  .attr('class', 'rect-1');
 
-var distributions = ['bernoulli',
-                     'binomialDiscrete',
-                     'negbin',
-                     'geometric',
-                     'poisson',
-                     'uniform',
-                     'normal',
-                     'studentt',
-                     'chisquare',
-                     'exponential',
-                     'centralF',
-                     'gamma', 
-                     'beta'];
-                     
-var initialView = {'bernoulli':[-1,5], 
-                   'binomialDiscrete':[-1,5], 
-                   'negbin':[-1,5], 
-                   'geometric':[-1,5], 
-                   'poisson':[-1,5],
-                   'uniform':[-6,6], 
-                   'normal':[-5,5], 
-                   'studentt':[-5,5], 
-                   'chisquare':[-1,8], 
-                   'exponential':[-1,5], 
-                   'centralF':[-1,5],
-                    "":[-5,5], 
-                    'gamma': [-1,5], 
-                    'beta': [-0.5,1.5]};
+var squareSide = 100;
+var data = [{w: squareSide, h: squareSide, tx: 0, ty: 0, r: 0}];
 
-var currentDist="";
-var currentPercent = 0;
+//add the first square
+var rects = svgRecur.selectAll('rect')
+  .data(data)
+  .enter()
+  .append('rect')
+  .attr('x', 0)
+  .attr('y', 0)
+  .attr('height', function(d) {return d.w})
+  .attr('width', function(d) {return d.h})
+  .attr('transform', function(d) { return 'rotate(' + d.r + ') translate(' + d.tx + ',' + d.ty + ')'})
+  .attr('fill', colorrange(1));
 
+var rectIndex = 1;
+var addSquares = function(){
+  var data = d3.selectAll('.rect-' + rectIndex + ' rect').data();
+  var rectColor = colorrange(rectIndex + 1);
 
-// Create SVG and elements
-var svgDist = d3.select("#graphDist").append("svg");
+  data.forEach(function(rectangle){
+    var s0 = rectangle;
+    var s1 = {};
+    var s2 = {};
 
-var xDist = svgDist.append("g").attr("class", "x axis");
-var yDist = svgDist.append("g").attr("class", "y axis");
-var clip = svgDist.append("clipPath").attr("id", "view").append("rect");
-var pdfPath = svgDist.append("path").attr("id", "pdf").attr("clip-path", "url(#view)");
-var pdfArea = svgDist.append("path").attr("id", "pdfArea").attr("clip-path", "url(#view)").moveToBack();
-var cdfPath = svgDist.append("path").attr("id", "cdf").attr("clip-path", "url(#view)");
-var shift = svgDist.append("rect").attr("fill", "transparent").attr("id","shift");
-var control = svgDist.append("g");
+    s1.w = s0.w/(Math.sqrt(2));
+    s1.h = s0.h/(Math.sqrt(2));
+    s1.tx = -(s0.h/2);
+    s1.ty = -(s0.h/2);
+    s1.r = -45;
 
-//Create scale functions
-var xScaleDist = d3.scale.linear().domain([-5, 5]);
+    s2.w = s1.w;
+    s2.h = s1.h;
+    s2.tx = s0.h;
+    s2.ty = -s0.h;
+    s2.r = 45;
 
-var yScaleDist = d3.scale.linear().domain([0, 1]);
+    var newData = [];
+    newData.push(s1, s2);
 
-//Define X axis
-var xAxisDist = d3.svg.axis()
-				  .scale(xScaleDist)
-				  .orient("bottom")
-				  .ticks(5);
+    var rectGroup = d3.selectAll('.rect-' + rectIndex).selectAll('g')
+      .data(newData)
+      .enter()
+      .append('g')
+      .attr('class', 'rect-' + (rectIndex + 1))
+      .attr('transform', function(d) { return 'translate(' + d.tx + ',' + d.ty + ') rotate(' + d.r + ')';})
+      .append('rect')
+      .attr('fill', 'white')
+      .transition()
+      .duration(500)
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('height', function(d) {return d.w})
+      .attr('width', function(d) {return d.h})
+      .attr('fill', rectColor);
+    })
 
-//Define Y axis
-var yAxisDist = d3.svg.axis()
-				  .scale(yScaleDist)
-				  .orient("left")
-				  .ticks(5);
-
-
-//Handle zoom and scale
-var zoom = d3.behavior.zoom()
-    .scaleExtent([0.25, 4])
-    .on("zoom", zoomed);
-
-
-//Zoom function
-function zoomed() {
-	if (xScaleDist.domain()[0] < xMax[0]) {
-	    var x = zoom.translate()[0] - xScaleDist(xMax[0]) + xScaleDist.range()[0];
-	    zoom.translate([x, 0]);
-	}
-	if (xScaleDist.domain()[1] > xMax[1]) {
-	    var x = zoom.translate()[0] - xScaleDist(xMax[1]) + xScaleDist.range()[1];
-	    zoom.translate([x, 0]);
-	}
-	if (yScaleDist.domain()[0] != yMax[0]) {
-	    var y = zoom.translate()[1] - yScaleDist(yMax[0]) + yScaleDist.range()[0];
-	    zoom.translate([zoom.translate()[0], y]);
-	}
-	if (yScaleDist.domain()[1] > yMax[1]) {
-	    var y = zoom.translate()[1] - yScaleDist(yMax[1]) + yScaleDist.range()[1];
-	    zoom.translate([zoom.translate()[0], y]);
-	}
-	//Update X axis
-	xDist.call(xAxisDist);
-	//Update Y axis
-	yDist.call(yAxisDist);
-	//Update current view area
-	currentView = xScaleDist.domain();
-
-	redrawPath(currentDist);
-}
-
-//Add control buttons for zoom and pan
-function move() {
-  svgDist.call(zoom.event); // https://github.com/mbostock/d3/issues/2387
-
-  // Record the coordinates (in data space) of the center (in screen space).
-  var center0 = zoom.center(), translate0 = zoom.translate(), dir = +this.getAttribute("data-move");
-  var translate = translate0[0]+center0[0]*dir;
-  // Translate from center.
-  zoom.translate([translate, 0]);
-
-  svgDist.transition().duration(1000).call(zoom.event);
-}
-
-function scale() {
-  svgDist.call(zoom.event); // https://github.com/mbostock/d3/issues/2387
-
-  // Record the coordinates (in data space) of the center (in screen space).
-  var center0 = zoom.center(), translate0 = zoom.translate(), coordinates0 = coordinates(center0);
-  scale = zoom.scale() * Math.pow(2, +this.getAttribute("data-zoom"));
-  zoom.scale(Math.max(0.25, Math.min(scale, 4)));
-
-  // Translate back to the center.
-  var center1 = point(coordinates0);
-  zoom.translate([translate0[0] + center0[0] - center1[0], translate0[1] + center0[1] - center1[1]]);
-
-  svgDist.transition().duration(1000).call(zoom.event);
-}
-
-function coordinates(point) {
-  var scale = zoom.scale(), translate = zoom.translate();
-  return [(point[0] - translate[0]) / scale, (point[1] - translate[1]) / scale];
-}
-
-function point(coordinates) {
-  var scale = zoom.scale(), translate = zoom.translate();
-  return [coordinates[0] * scale + translate[0], coordinates[1] * scale + translate[1]];
-}
-
-control.selectAll('image.move')
-        .data(['left','right'])
-        .enter()
-        .append('image')
-        .attr("xlink:href", function(d,i) { return "../img/"+d+".png"; })
-        .attr("x", function(d,i) {return i*50;})
-        .attr("y", 10)
-        .attr("width", 25)
-        .attr("height", 25)
-        .attr("class", "move")
-        .attr("data-move",function(d,i) {return 1 + i*-2;})
-        .on("click", move);
-
-control.selectAll('image.scale')
-        .data(['plus','minus'])
-        .enter()
-        .append('image')
-        .attr("xlink:href", function(d,i) { return "../img/"+d+".png"; })
-        .attr("x", 25)
-        .attr("y", function(d,i) {return i*25;})
-        .attr("width", 25)
-        .attr("height", 25)
-        .attr("class", "scale")
-        .attr("data-zoom",function(d,i) {return 1 + i*-2;})
-        .on("click", scale);
-
-// Draw PDF/CDF Path
-function redrawPath(dist) {
-  if(dist != "") {
-  	var line = d3.svg.line()
-  	  .x(function(d) { return xScaleDist(d[0])})
-  	  .y(function(d) { return yScaleDist(d[1])})
-  	  .interpolate("linear");
-  	var area = d3.svg.area()
-  	  .x(function(d) { return xScaleDist(d[0])})
-  	  .y0(yScaleDist(0))
-  	  .y1(function(d) { return yScaleDist(d[1])})
-  	  .interpolate("linear");
-  	var parameter = parameters[dist];
-  	var params = parameter.map(function(x){return parseFloat(document.getElementById(dist+x).value)});
-  	params.unshift(0);
-  	pdfPath
-  	  .datum(d3.range(Math.floor(currentView[0]),Math.ceil(currentView[1])+0.01,0.01).map(function(x) { 
-  	  	params[0] = x;
-  	  	return [x, Math.min(jStat[dist].pdf.apply(null, params),yMax[1])]; }))
-  	  .attr("d", line)
-  	  .attr("stroke-width", "5px");
-  	pdfArea
-  	  .datum(d3.range(currentView[0],currentView[0]+0.01+(currentView[1]-currentView[0])*currentPercent,0.01).map(function(x) { 
-  	  	params[0] = x;
-  	  	return [x, Math.min(jStat[dist].pdf.apply(null, params),yMax[1])]; }))
-  	  .attr("d", area)
-      .style("opacity", "0.5");
-  	cdfPath
-  	  .datum(d3.range(currentView[0],currentView[0]+0.01+(currentView[1]-currentView[0])*currentPercent,0.01).map(function(x) { 
-  	  	params[0] = x;
-  	  	return [x, jStat[dist].cdf.apply(null, params)]; }))
-  	  .attr("d", line)
-      .attr("stroke-width", "5px");
-  } else {
-    pdfPath.attr("stroke-width", "0");
-    pdfArea.style("opacity", "0");
-    cdfPath.attr("stroke-width", "0");
+    rectIndex ++;
   }
-}
 
-//Update Range Input
-$(".inputDist").on("slide", function(e) {
-	updateRangeInput(e.value, this.id);
-	redrawPath(this.parentNode.id);
-	});
-function updateRangeInput(n, id) {
-  d3.select("#"+id+"-value").text(round(n,2));
+  $('#grow').click(function() {
+    if (rectIndex <= 10) {
+      addSquares();
+    } else {
+      $('#grow').addClass('disable');
+    }
+  });
+
+//*******************************************************************************//
+//Dynamic Programming
+//*******************************************************************************//
+
+var treeData = [{children:[{children:[{},{},{}]},{children:[{children:[{}]}]},{},{children:[{},{children:[{},{}]}]}]}];
+
+//http://bl.ocks.org/d3noob/8326869
+var margin = {top: 20, right: 0, bottom: 20, left: 0},
+  width = document.getElementById("dfs-container").offsetWidth - margin.right - margin.left,
+  height = document.getElementById("dfs-container").offsetHeight - margin.top - margin.bottom;
+
+var i=0, animDuration=500,root;
+
+var treeDfs = d3.layout.tree()
+  .size([height, width]);
+
+
+// https://github.com/wbkd/d3-extended
+d3.selection.prototype.moveToFront = function() {  
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
 };
 
-//Update Percent Input
-$("#percentDist").on("slide", function(e) {
-	currentPercent = e.value;
-	redrawPath(currentDist);
-	});
-
-//Handles discrete/continuous radio buttons
-$("input[name='distributions']").on("change", function () {
-    $('.definition').toggle();
-    $('.distribution').css('display','none');
-    $('.distributions').val(function () {
-      return $(this).find('option').filter(function () {
-          return $(this).prop('defaultSelected');
-      }).val();
-    });
-    currentDist = "";
-    $('#descriptionTable').css('display','none');
-    $('#resetDist').css('display','none').click();
-});
-
-//Draw Distribution
-$('.distributions').on('change', function(){
-    var dist = $(this).find("option:selected").prop('value');
-    $('.distribution').css('display','none');
-    $('.'+dist).toggle();
-    currentDist = dist;
-    $('#descriptionTable').css('display','table');
-    $('#resetDist').css('display','inline-block').click();
-});
-
-
-//Reset function
-$('#resetDist').on('click', function() {
-	distributions.map(function(x){
-		var paramNames = parameters[x];
-		var paramValues = initialParameters[x];
-		for (var i = paramNames.length - 1; i >= 0; i--) {
-			updateRangeInput(paramValues[i], x+paramNames[i]);
-			$('#'+x+paramNames[i]).slider('setValue',paramValues[i]);
-		};
-	});
-  currentView = initialView[currentDist];
-  xScaleDist.domain(currentView);
-  yScaleDist.domain([0, 1]);
-  zoom.x(xScaleDist).y(yScaleDist);
-  xDist.call(xAxisDist);
-  yDist.call(yAxisDist);
-  currentPercent = 0;
-  $("#percentDist").slider('setValue',0);
-  redrawPath(currentDist);
-});
-
-//Update SVG based on width of container
-function drawDist(){
-	var w = parseInt(d3.select("#graphDist").style("width"));
-	var h = 500;
-	var padding = 35;
-
-  $("#percentDist").css('width',w-2*padding).css('margin-left',padding);
-  $("#percentDist").slider('refresh').slider('setValue',currentPercent);
-
-  svgDist.attr("width", w).attr("height", h);
-
-	yScaleDist.range([h-padding, padding]);
-	xScaleDist.range([padding, w-padding]);
-	zoom.x(xScaleDist).y(yScaleDist).center([w / 2, h / 2]);
-
-  control.attr("transform", "translate(" + (w-120) + "," + padding + ")")
-
-	xDist.attr("transform", "translate(0," + (h - padding) + ")").call(xAxisDist);
-	yDist.attr("transform", "translate(" + padding + ",0)").call(yAxisDist);
-	shift.attr("x", padding).attr("y", padding).attr("width", w-2*padding).attr("height", h-2*padding).call(zoom);
-	clip.attr("x", padding).attr("y", padding-2).attr("width", w-2*padding).attr("height", h-2*padding+4);
-
-	redrawPath(currentDist);
-}
-
-
-//*******************************************************************************//
-//Central Limit Theorem
-//*******************************************************************************//
-
-// define width, height, margin
-var margin = {top: 15, right: 5, bottom: 15, left: 5};
-var width = 800;//parseInt(d3.select("#graph").style("width")) - margin.left - margin.right,
-    height = 500;
-// create svg
-var svg_clt = d3.select("#graph").append("svg")
-  .attr("width", "100%")
-  .attr("height", "100%")
-  .attr("viewBox", "0 0 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
-  .attr("preserveAspectRatio", "xMidYMid meet")
+var svgDfs = d3.select("#dfs-container").append("svg")
+  .attr("width", width + margin.right + margin.left)
+  .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+/*
+rootDfs= treeData[0];
+updateDfs(treeData[0]);
 
-// constants
-var dt = 100,
-    n = 1,
-    draws = 1,
-    alpha = 1,
-    beta = 1,
-    y1 = height / 3,
-    y2 = height / 4,
-    bins = 20,
-    counts = [],
-    interval_clt;
+function resetTraversalDfs(root){
+  //d3.selectAll(".node").classed("visited",false);
+  d3.selectAll(".nodeDfs")
+    .transition().duration(animDuration)
+    .style("fill","#fff")
+    .style("stroke","steelblue");
 
-
-// scales
-var x_scale_clt = d3.scale.linear().domain([0, 1]).range([0, width]);
-var y_scale_clt = d3.scale.linear().domain([0, 3]).range([0, height - (2*y1)]);
-var z_scale_clt = d3.scale.linear().domain([0, 3]).range([0, y1]);
-
-
-// clip path
-var clip_clt = svg_clt.append("clipPath")
-                .attr("id", "view_clt")
-                .append("rect")
-                .attr("x", 0)
-                .attr("y", height - (2*y1 - y2))
-                .attr("width", width)
-                .attr("height", (2*y1 - y2));
-
-// draw horizontal bar
-function draw_bar(selection, dy, label) {
-  // group
-  var axis = selection.append("g").attr("class", "axis");
-  // bar
-  axis.append("line")
-    .attr("x1", x_scale_clt(0))
-    .attr("x2", x_scale_clt(1))
-    .attr("y1", dy)
-    .attr("y2", dy);
-  // label
-  axis.append("text")
-    .attr("x", x_scale_clt(0))
-    .attr("y", dy)
-    .attr("dy", "1em")
-    .text(label);
-};
-// create three bars
-svg_clt.call(draw_bar, y1, "draw");
-svg_clt.call(draw_bar, y1+y2, "average");
-svg_clt.call(draw_bar, 3*y1, "count");
-
-
-// path and area elements
-var sampling_path = svg_clt.append("path").attr("id", "pdf"),
-    sampling_area = svg_clt.append("path").attr("id", "pdfArea"),
-    theoretical_path = svg_clt.append("path")
-                              .attr("id", "cdf")
-                              .attr("opacity", 0)
-                              .attr("clip-path", "url(#view_clt)")
-                              .moveToBack();
-
-// Update sampling distributions
-function draw_sampling() {
-  // path function
-	var line = d3.svg.line()
-	  .x(function(d) { return x_scale_clt(d[0])})
-	  .y(function(d) { return y1 - z_scale_clt(d[1])})
-	  .interpolate("basis");
-  // area function
-	var area = d3.svg.area()
-	  .x(function(d) { return x_scale_clt(d[0])})
-	  .y0(y1)
-	  .y1(function(d) { return y1 - z_scale_clt(d[1])})
-	  .interpolate("basis");
-  // pdf data
-  var datum = d3.range(0, 1.05, 0.05).map(function(x) { 
-    return [x, Math.min(jStat.beta.pdf(x, alpha, beta),10)]; 
-  })
-  // update sampling distribution
-	sampling_path.datum(datum).attr("d", line);
-	sampling_area.datum(datum).attr("d", area);
-  // draw threoretical
-  draw_theoretical(datum);
 }
 
-// draw theoretical distribution
-function draw_theoretical(datum) {
-  // path function
-  var line = d3.svg.line()
-    .x(function(d) { return x_scale_clt(d[0])})
-    .y(function(d) { return 3*y1 - y_scale_clt(d[1])})
-    .interpolate("basis");
-  // update theoretical distribution
-  if (n == 1) {
-    theoretical_path.datum(datum).attr("d", line);
-    //y_scale_clt.domain([0,3]);
-  } else {
-    var mean = jStat.beta.mean(alpha, beta);
-    var variance = jStat.beta.variance(alpha, beta)/n;
-    var x_mode = jStat.normal.mode(mean, Math.sqrt(variance));
-    y_scale_clt.domain([0, jStat.normal.pdf(x_mode, mean, Math.pow(variance,0.5))]);
-    datum = d3.range(0, 1.05, 0.05).map(function(x) { return [x, jStat.normal.pdf(x, mean, Math.pow(variance,0.5))]; });
-    theoretical_path.datum(datum).attr("d", line);
+function updateDfs(root) {
+
+
+
+  resetTraversalDfs(root);
+
+  // Compute the new tree layout.
+  var nodes = treeDfs.nodes(root).reverse(),
+    links = treeDfs.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth *100; });
+
+  // Declare and append the nodes
+  var nodeWrapper = svgDfs.append("g").attr("id","nodesDfs").selectAll("g.node")
+    .data(nodes, function(d) {return d.id || (d.id = ++i); })
+    .enter().append("circle")
+    .attr("class", "nodeDfs")
+    //Root is the highest ID
+    .attr("id",function(d){return "node-dfs-"+d.id})
+    .attr("cx",function(d){return d.x;})
+    .attr("cy",function(d){return d.y;})
+    .attr("r", 10);
+
+  nodeWrapper.append('text').text(3).attr('fill', 'teal');
+
+  // Declare and append the links
+  //line elements are not containers; adding a text element to a line will be ignored.
+  var link = svgDfs.append("g").attr("id","links").selectAll("path.link")
+    .data(links, function(d) { return d.target.id; })
+    .enter()
+    .append('g')
+    .attr('class', 'link');
+
+  link.append('line')
+    .attr("id",function(d){
+      return d.source.id +"->"+ d.target.id;
+    })
+    .attr('x1', function(d){return d.source.x;})
+    .attr('x2',function(d){return d.target.x;})
+    .attr('y1',function(d){return d.source.y;})
+    .attr('y2',function(d){return d.target.y;});
+
+    //.attr('transform', 'translate(0,0)')
+  link.append('text')
+    .attr('class', 'linkLabel')
+    .attr("x", function(d){return (d.source.x + d.target.x)/2;})
+    .attr("y", function(d){return (d.source.y + d.target.y)/2;})
+    .text(function(d) {return d.target.id;});
+
+  //Styling consideration
+  d3.select("#nodesDfs").moveToFront();
+  //d3.select(".linkLabel").moveToFront();
+
+}
+  */
+
+function visitElementDfs(element,animX, color){
+ // d3.select("#node-"+element.id).classed("visited",true);
+  d3.select("#node-dfs-"+element.id)
+    .transition().duration(animDuration).delay(animDuration*animX)
+    .style("fill",color).style("stroke",color);
+}
+
+visited = {}
+
+function dftDfs(){
+  var stack=[];
+  var animX=0;
+  stack.push(root);
+  while(stack.length!==0){
+    var element = stack.pop();
+    if (visited.hasOwnProperty(element.name)) {
+      toggleAll(element); //proof of concept
+      fillAll(element, animX, 'purple')
+      //visitElementDfs(element,animX, 'red');
+      update(element, animX * 500);
+      animX=animX+1;
+      continue;
+    } else {
+      visited[element.name] = element.id; //add to dictionary
+    }
+    visitElementDfs(element,animX, 'red');
+    animX=animX+1;
+    if((element.children!==undefined) && (element.children !== null)){
+      for(var i=0; i<element.children.length; i++){
+        stack.push(element.children[element.children.length-i-1]);
+      }
+    }
   }
 }
 
-// create histogram
-var histogram = d3.layout.histogram().bins(x_scale_clt.ticks(bins)).frequency(false);
-var bars = svg_clt.append("g").attr("class", "histogram");
-
-function draw_histogram() {
-  // get histrogram of counts
-  var data = histogram(counts);
-  // update scale
-  var ymax = d3.max(data.map(function(d) { return d.y; }));
-  y_scale_clt.domain([0, ymax*bins]);
-  // enter bars
-  var bar = bars.selectAll("g").data(data);
-  var barEnter = bar.enter().append("g").attr("class", "bar");
-  barEnter.append("rect");
-  barEnter.append("text")
-    .attr("y", 3*y1 - 15)
-    .attr("text-anchor", "middle");
-  // update bars
-  bar.select("rect")
-    .attr("x", function(d) { return x_scale_clt(d.x) + 1; })
-    .attr("width", x_scale_clt(data[0].dx) - 1)
-  .transition().duration(250)
-    .attr("y", function(d) { return 3*y1 - y_scale_clt(d.y*bins); })
-    .attr("height", function(d) { return y_scale_clt(d.y*bins); });
-  bar.select("text")
-    .attr("x", function(d) { return x_scale_clt(d.x + 1/(2*bins)); })
-    .text(function(d) { return d.y > 0 ? d3.format("%")(d.y) : ""; });
-  // exit bars
-  bar.exit().remove();
-};
-
-// Creates Circles and transitions
-function tick() {
-  // take samples
-  var data = [];
-  for (var i = 0; i < n; i++) {
-    data.push(jStat.beta.sample(alpha,beta));
-  };
-  var mean = d3.mean(data);
-  // add balls
-  var group = svg_clt.append("g").attr("class", "ball-group");
-  var balls = group.selectAll(".ball").data(data);
-  // animate balls
-  var i = 0, j = 0;
-  balls.enter()
-    .append("circle")
-    .attr("class", "ball")
-    .attr("cx", function(d) { return x_scale_clt(d); })
-    .attr("cy", y1)
-    .attr("r", 5)
-    .transition()
-    .duration(dt)
-    .attr("cy", y1 + y2 - 5)
-    .each(function() { ++i; })
-    .each("end", function() {
-      if (!--i) {
-        balls
-          .transition()
-          .duration(400)
-          .attr("cx", x_scale_clt(mean))
-          .style("fill", "#00d0a1")
-          .transition()
-          .duration(400)
-          .attr("cy", 3*y1-3)
-          .attr("r", 3)
-          .each(function() { ++j; })
-          .each("end", function() {
-            if (!--j) {
-              counts.push(mean);
-              draw_histogram();
-              draw_sampling();
-            }
-            d3.select(this).remove();
-          });
-      };
-    });
+function fillAll(d, time, color) {
+  visitElementDfs(d, time, color);
+  if (d.children) {
+    for (var i = 0; i < d.children.length; i++) {
+      console.log(d.children[i]);
+      fillAll(d.children[i], time, color);
+    }
+  }
 }
 
-// initiate sampling
-function start_sampling() {
-  dt = 350/Math.pow(1.04, draws);
-  var count = 0;
-  interval_clt = setInterval(function() { 
-    tick();
-      if (++count === draws){
-        clearInterval(interval_clt);
-      }
-  }, dt);
-}
-
-
-// reset and clear CLT
-function reset_clt() {
-  clearInterval(interval_clt);
-  counts = [];
-  d3.timer.flush();
-  svg_clt.selectAll("circle").remove();
-  svg_clt.selectAll(".bar").remove();
-  y_scale_clt.domain([0,3]);
-  draw_sampling();
-}
-
-// update alpha
-$("#alpha_clt").on("slide", function(e) {
-  alpha = e.value;
-  d3.select("#alpha_clt-value").text(round(alpha,2));
-  reset_clt();
+$('#rundfs').click(function() {
+  dftDfs();
 });
 
-// update beta
-$("#beta_clt").on("slide", function(e) {
-  beta = e.value;
-  d3.select("#beta_clt-value").text(round(beta,2));
-  reset_clt();
+$('#resetdfs').click(function() {
+  resetTraversalDfs();
 });
 
-// update sample size
-d3.select("#sample").on("input", function() {
-  n = +this.value;
-  d3.select("#sample-value").text(n);
-  reset_clt();
-	});
-
-// update number of draws
-d3.select("#draws").on("input", function() {
-  draws = +this.value;
-});
-
-// theoretical on/off
-$("#theoretical").change(function() {
-   if($(this).is(":checked")) {
-      theoretical_path.attr("opacity", 1);
-   } else {
-      theoretical_path.attr("opacity", 0);
-   }
-   draw_sampling();
-});
-
-// drop balls
-$("#form_clt").submit(function(e) {
-  e.preventDefault();
-  start_sampling();
-});
 
