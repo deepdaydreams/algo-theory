@@ -126,3 +126,16 @@ label {
     stroke-width: 1;
     fill: #fff;
 }
+
+.fib rect {
+  fill: white;
+  stroke: steelblue;
+  stroke-width: 2;
+}
+
+.fib text {
+  fill: grey;
+  font: 18px sans-serif;
+  text-anchor: mid;
+}
+
