@@ -1,3 +1,116 @@
+/* Big Oh Visualizer */
+
+#dieWrapper {
+	display: inline-flex;
+	align-items: center;
+}
+
+#die {
+	width:100px;
+	height: 100px;
+	background-image: url(../img/dice_6.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	display: inline-block;
+}
+
+#dieButtons {
+	display: inline-flex;
+	flex-direction: column;
+}
+
+#expected {
+	fill: none;
+	stroke:	#00d0a1;
+	stroke-width: 2px;
+}
+#actual {
+	fill: none;
+	stroke:	#64bdff;
+	stroke-width: 2px;
+}
+
+#test {
+	fill: none;
+	stroke:	#64bdee;
+	stroke-width: 2px;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: black;
+	stroke-width: 2;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	font-family: "Helvetica Neue";
+	font-size: 11px;
+	fill: black;
+}
+
+#avgFocus {
+	color: #00d0a1;
+	font-size: bold;
+}
+
+#expFocus {
+	color: #64bdff;
+}
+
+#testFocus {
+	color: #64bdee;
+}
+
+#focusLine {
+	fill: none;
+	stroke: black;
+	stroke-width: 1px;
+}
+
+#expectedCircle {
+	fill: #64bdff;
+	stroke: white;
+	stroke-width: 2px;
+}
+
+#testCircle {
+	fill: #64bdee;
+	stroke: white;
+	stroke-width: 2px;
+}
+
+#averageCircle {
+	fill: #00d0a1;
+	stroke: white;
+	stroke-width: 2px;
+}
+
+/* Master Theorem Visualization */ 
+.A {
+  fill: #FF9B3C;
+  color: #FF9B3C;
+  stroke: #FF9B3C;
+}
+.B {
+  fill: #00d0a1;
+  color: #00d0a1;
+  stroke: #00d0a1;
+}
+.C {
+  fill: #64bdff;
+  color: #64bdff;
+  stroke: #64bdff;
+}
+.D {
+  fill: #FFFF00;
+  color: #FFFF00;
+  stroke: #FFFF00;
+}
+
+
+/* Other Stuff */
 
 .axis path,
 .axis line {

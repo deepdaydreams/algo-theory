@@ -2,15 +2,15 @@
 
 $( window ).load(function() {
   draw_anova();
-  drawOls();
-  drawCorr();
+  drawComb();
+  drawDie();
 });
 
 //Handles Window Resize
 $(window).on("resize", function () {
-  drawOls();
-  drawCorr();
   draw_anova();
+  drawComb();
+  drawDie();
 });
 
 // extracts column from JSON
@@ -22,616 +22,706 @@ function extractColumn(arr, column) {
   return arr.reduce(reduction, []);
 }
 
+//Handles CSS animation for coin and die
+//Adapted from http://jsfiddle.net/byrichardpowell/38MGS/1/
+$.fn.animatecss = function(anim, time, cb) {
+    if (time) this.css('-webkit-transition', time / 1000 + 's');
+    this.addClass(anim);
+    if ($.isFunction(cb)) {
+        setTimeout(function() {
+            $(this).each(cb);
+        }, (time) ? time : 250);
+    }
+    return this;
+};
+
+
 //*******************************************************************************//
 //Linear Regression
 //*******************************************************************************//
-// constants
-var data_ols = [],
-    keys_ols = [],
-    x_index,
-    y_index,
-    dur = 100;
 
-// create SVG element
-var svg_ols = d3.select("#svg_ols").append("svg").attr("display", "inline-block");
+var bubbleTimes = [[0, 0.0008106231689453125], [1, 0.00782012939453125], [2, 0.0020265579223632812], [3, 0.0021696090698242188], [4, 0.004649162292480469], [5, 0.0035524368286132812], [6, 0.0045299530029296875], [7, 0.015568733215332031], [8, 0.015115737915039062], [9, 0.02079010009765625], [10, 0.033092498779296875], [11, 0.023245811462402344], [12, 0.04439353942871094], [13, 0.024962425231933594], [14, 0.02448558807373047], [15, 0.020623207092285156], [16, 0.018405914306640625], [17, 0.026535987854003906], [18, 0.03132820129394531], [19, 0.03330707550048828], [20, 0.03478527069091797], [21, 0.035381317138671875], [22, 0.04100799560546875], [23, 0.04019737243652344], [24, 0.03685951232910156], [25, 0.04761219024658203], [26, 0.048923492431640625], [27, 0.050139427185058594], [28, 0.05183219909667969], [29, 0.0530242919921875], [30, 0.05919933319091797], [31, 0.07710456848144531], [32, 0.07369518280029297], [33, 0.07131099700927734], [34, 0.08318424224853516], [35, 0.08471012115478516], [36, 0.10037422180175781], [37, 0.09083747863769531], [38, 0.0985860824584961], [39, 0.1089334487915039], [40, 0.10569095611572266], [41, 0.10826587677001953], [42, 0.11255741119384766], [43, 0.1073598861694336], [44, 0.13594627380371094], [45, 0.12884140014648438], [46, 0.15933513641357422], [47, 0.1415729522705078], [48, 0.13625621795654297], [49, 0.13840198516845703], [50, 0.14667510986328125], [51, 0.15115737915039062], [52, 0.1607656478881836], [53, 0.17392635345458984], [54, 0.17571449279785156], [55, 0.20546913146972656], [56, 0.21390914916992188], [57, 0.18939971923828125], [58, 0.20129680633544922], [59, 0.1964092254638672], [60, 0.2254009246826172], [61, 0.23088455200195312], [62, 0.2199411392211914], [63, 0.2290487289428711], [64, 0.22978782653808594], [65, 0.24154186248779297], [66, 0.2496480941772461], [67, 0.2844095230102539], [68, 0.2690553665161133], [69, 0.2785921096801758], [70, 0.29532909393310547], [71, 0.2942085266113281], [72, 0.3153800964355469], [73, 0.30002593994140625], [74, 0.3134489059448242], [75, 0.3132820129394531], [76, 0.3504753112792969], [77, 0.3495216369628906], [78, 0.3490447998046875]];
 
-// create scale functions
-var x_scale_ols = d3.scale.linear().domain([0, 20]),
-    y_scale_ols = d3.scale.linear().domain([0, 15]);
+var insertTimes = [[0, 0.0005483627319335938], [1, 0.0005960464477539062], [2, 0.0008106231689453125], [3, 0.0011682510375976562], [4, 0.0015735626220703125], [5, 0.0024080276489257812], [6, 0.0029325485229492188], [7, 0.0025987625122070312], [8, 0.0034093856811523438], [9, 0.0046253204345703125], [10, 0.005030632019042969], [11, 0.005984306335449219], [12, 0.008630752563476562], [13, 0.007653236389160156], [14, 0.0074863433837890625], [15, 0.008821487426757812], [16, 0.01049041748046875], [17, 0.010585784912109375], [18, 0.011515617370605469], [19, 0.013637542724609375], [20, 0.014567375183105469], [21, 0.01575946807861328], [22, 0.017309188842773438], [23, 0.016498565673828125], [24, 0.01850128173828125], [25, 0.02186298370361328], [26, 0.022125244140625], [27, 0.025010108947753906], [28, 0.02548694610595703], [29, 0.027179718017578125], [30, 0.02892017364501953], [31, 0.030374526977539062], [32, 0.032448768615722656], [33, 0.03440380096435547], [34, 0.037360191345214844], [35, 0.03762245178222656], [36, 0.04134178161621094], [37, 0.03809928894042969], [38, 0.04584789276123047], [39, 0.046825408935546875], [40, 0.048041343688964844], [41, 0.05118846893310547], [42, 0.056481361389160156], [43, 0.0576019287109375], [44, 0.057888031005859375], [45, 0.0627279281616211], [46, 0.06268024444580078], [47, 0.06794929504394531], [48, 0.07488727569580078], [49, 0.07169246673583984], [50, 0.08144378662109375], [51, 0.07624626159667969], [52, 0.08780956268310547], [53, 0.0818490982055664], [54, 0.08459091186523438], [55, 0.0898599624633789], [56, 0.10004043579101562], [57, 0.10111331939697266], [58, 0.10099411010742188], [59, 0.10232925415039062], [60, 0.1177072525024414], [61, 0.10483264923095703], [62, 0.12390613555908203], [63, 0.1138925552368164], [64, 0.11837482452392578], [65, 0.1304149627685547], [66, 0.11970996856689453], [67, 0.12447834014892578], [68, 0.12524127960205078], [69, 0.13911724090576172], [70, 0.14171600341796875], [71, 0.1436471939086914], [72, 0.14982223510742188], [73, 0.1540660858154297], [74, 0.15332698822021484], [75, 0.15823841094970703], [76, 0.1674175262451172], [77, 0.16748905181884766], [78, 0.17178058624267578]];
 
-// define axis
-var x_axis_ols = d3.svg.axis().scale(x_scale_ols).orient("bottom").ticks(5),
-    y_axis_ols = d3.svg.axis().scale(y_scale_ols).orient("left").ticks(5);
+var mergeTimes = [[0, 0.000286102294921875], [1, 0.0021219253540039062], [2, 0.0033140182495117188], [3, 0.004601478576660156], [4, 0.006508827209472656], [5, 0.008296966552734375], [6, 0.01010894775390625], [7, 0.011610984802246094], [8, 0.013780593872070312], [9, 0.015854835510253906], [10, 0.018215179443359375], [11, 0.020456314086914062], [12, 0.02956390380859375], [13, 0.025081634521484375], [14, 0.025773048400878906], [15, 0.02765655517578125], [16, 0.030279159545898438], [17, 0.03247261047363281], [18, 0.034928321838378906], [19, 0.0959634780883789], [20, 0.06039142608642578], [21, 0.045418739318847656], [22, 0.043082237243652344], [23, 0.048661231994628906], [24, 0.048661231994628906], [25, 0.050830841064453125], [26, 0.05321502685546875], [27, 0.06666183471679688], [28, 0.05671977996826172], [29, 0.06301403045654297], [30, 0.10385513305664062], [31, 0.07777214050292969], [32, 0.08966922760009766], [33, 0.06909370422363281], [34, 0.0772237777709961], [35, 0.10192394256591797], [36, 0.08974075317382812], [37, 0.1047372817993164], [38, 0.0978231430053711], [39, 0.10161399841308594], [40, 0.08575916290283203], [41, 0.11970996856689453], [42, 0.10232925415039062], [43, 0.11627674102783203], [44, 0.13191699981689453], [45, 0.1257181167602539], [46, 0.12710094451904297], [47, 0.1177072525024414], [48, 0.13720989227294922], [49, 0.11584758758544922], [50, 0.12969970703125], [51, 0.14829635620117188], [52, 0.16088485717773438], [53, 0.19767284393310547], [54, 0.13837814331054688], [55, 0.15790462493896484], [56, 0.14426708221435547], [57, 0.1537322998046875], [58, 0.16515254974365234], [59, 0.16341209411621094], [60, 0.16851425170898438], [61, 0.18355846405029297], [62, 0.1672983169555664], [63, 0.16062259674072266], [64, 0.16176700592041016], [65, 0.17936229705810547], [66, 0.1806020736694336], [67, 0.18436908721923828], [68, 0.20551681518554688], [69, 0.18999576568603516], [70, 0.18553733825683594], [71, 0.16922950744628906], [72, 0.18656253814697266], [73, 0.1761913299560547], [74, 0.19288063049316406], [75, 0.18622875213623047], [76, 0.18367767333984375], [77, 0.18627643585205078], [78, 0.18851757049560547]];
 
-// create axis
-var x_axis_group_ols = svg_ols.append("g").attr("class", "x axis"),
-    y_axis_group_ols = svg_ols.append("g").attr("class", "y axis");
-
-// create clip path
-var clip_ols = svg_ols.append("clipPath").attr("id", "viewOLS").append("rect");
-
-//Add Plot Titles
-var xaxisTextOLS = svg_ols.append("text").attr("text-anchor", "middle"),                
-    yaxisTextOLS = svg_ols.append("text").attr("text-anchor", "middle");
-                    
-//Create tool tip
-var tipOLS = d3.tip().attr('class', 'd3-tip').offset([-10, 0]);
-$(window).on('mouseup', tipOLS.hide);
-
-//Create container for graph elements(data points and lines)
-var containerOLS = svg_ols.append("g").attr("clip-path", "url(#viewOLS)").call(tipOLS);
-
-// drag functions
-var dragOLS = d3.behavior.drag() 
-    .origin(function(d) { return {x: d3.select(this).attr("cx"), y: d3.select(this).attr("cy")}; }) 
-    .on('drag', function(d) {
-        var r = parseFloat(d3.select(this).attr("r")),
-            x = Math.max(x_scale_ols.range()[0] + r, Math.min(x_scale_ols.range()[1] - r, d3.event.x)),
-            y = Math.max(y_scale_ols.range()[1] + r, Math.min(y_scale_ols.range()[0] - r, d3.event.y));
-        d3.select(this).attr('cx', x).attr('cy', y);
-        d[keys_ols[x_index]] = x_scale_ols.invert(x);
-        d[keys_ols[y_index]] = y_scale_ols.invert(y);
-        tipOLS.show(d,this);
-        statisticsCalcOLS(0); })
-
-// Add data points to plot
-function addDataPointsOLS (){
-  // update text
-  xaxisTextOLS.text(keys_ols[x_index]);
-  yaxisTextOLS.text(keys_ols[y_index]);
-
-  // update tooltip
-  tipOLS.html(function(d,i) { 
-    return '<strong>' + keys_ols[x_index] + ': </strong>' + round(d[keys_ols[x_index]], 2) + '<br>' +
-           '<strong>' + keys_ols[y_index] + ': </strong>' + round(d[keys_ols[y_index]], 2);});
-
-  // select all circles
-  var circles = containerOLS.selectAll("circle.data").data(data_ols);
-  // enter new circles
-  circles.enter()
-    .append("circle")
-    .attr("r", 5)
-    .attr("class","data")
-    .call(dragOLS)
-    .on('mousedown', function(d){tipOLS.show(d,this)})
-    .on('mouseover', function(d){tipOLS.show(d,this)})
-    .on('mouseout', tipOLS.hide);
-
-  // add regression line
-  containerOLS.selectAll("line.ols")
-    .data([1])
-    .enter()
-    .append("line")
-    .attr("class", "ols")
-    .moveToBack();
-
-  // select all rectangles
-  var rects = containerOLS.selectAll("rect.sse").data(data_ols);
-  // enter new circles
-  rects.enter()
-    .append("rect")
-    .attr("r", 5)
-    .attr("class","sse")
-    .moveToBack();
-}
-
-// calculates ols coeficients given dataset
-function ols_coef_calc(xdata, ydata) {
-  var n = xdata.length,
-      xmean = d3.mean(xdata),
-      ymean = d3.mean(ydata),
-      sxx = 0,
-      sxy = 0;
-  for (var i = 0; i < n; i++) {
-    sxx += Math.pow((xdata[i] - xmean), 2);
-    sxy += (xdata[i] - xmean) * (ydata[i] - ymean);
-  }
-  var b1 = sxy / sxx,
-      b0 = ymean - b1 * xmean;
-
-  var sse = 0;
-  for (var i = 0; i < n; i++) {
-    sse += Math.pow((xdata[i] * b1 + b0 - ydata[i]), 2);
-  }
-  var b0_std = sse*Math.pow(xmean,2)/sxx + sse/n,
-      b1_std = sse/sxx;
-
-  return [n, xmean, ymean, b0, b1, sse, b0_std, b1_std];
-}
-
-// Updates regression table and transition elements
-function statisticsCalcOLS(dur) {
-  if (data_ols.length == 0) return;
-  // get data
-  var xdata = extractColumn(data_ols, keys_ols[x_index]),
-      ydata = extractColumn(data_ols, keys_ols[y_index]),
-      result = ols_coef_calc(xdata, ydata)
-      b0 = result[3],
-      b1 = result[4]
-      x0 = x_scale_ols.range()[0],
-      x1 = x_scale_ols.range()[1];
-
-  // update table
-  $('#sampleSizeValue').html(result[0]);
-  $('#xMeanValue').html(round(result[1], 2));
-  $('#yMeanValue').html(round(result[2], 2));
-  $('#beta0Value').html(round(result[3], 2));
-  $('#beta1Value').html(round(result[4], 2));
-  $('#sseValue').html(round(result[5], 2));
-  $('#beta0STD').html(round(result[6], 2));
-  $('#beta1STD').html(round(result[7], 2));
-
-  // transition circles
-  containerOLS.selectAll("circle.data")
-    .transition()
-    .duration(dur)
-    .attr("cx", function(d){return x_scale_ols(d[keys_ols[x_index]])})
-    .attr("cy", function(d){return y_scale_ols(d[keys_ols[y_index]])});
-
-  // transition line
-  containerOLS.selectAll("line.ols")
-     .transition()
-     .duration(dur)
-     .attr("x1", x0)
-     .attr("y1", y_scale_ols(b0 +b1*x_scale_ols.invert(x0)))
-     .attr("x2", x1)
-     .attr("y2", y_scale_ols(b0 +b1*x_scale_ols.invert(x1)));
-
-  // transition rectangles
-  containerOLS.selectAll("rect.sse")
-    .transition()
-    .duration(dur)
-    .attr("x", function(d){return x_scale_ols(d[keys_ols[x_index]])})
-    .attr("y", function(d){return y_scale_ols(Math.max(d[keys_ols[y_index]], b0+b1*d[keys_ols[x_index]])); })
-    .attr("width", function(d){return Math.abs(y_scale_ols(d[keys_ols[y_index]]) - y_scale_ols(b0+b1*d[keys_ols[x_index]])); })
-    .attr("height", function(d){return Math.abs(y_scale_ols(d[keys_ols[y_index]]) - y_scale_ols(b0+b1*d[keys_ols[x_index]])); });
-
-}
-
-//Draw Populations
-$('#datasetsOls').change(function(e){
-    d3.csv('data/anscombe.csv', function(data){
-      data_ols = data;
-      keys_ols = d3.keys(data_ols[0])
-      x_index = +$('input[name = "ols"]:checked').val();
-      y_index = x_index + 4;
-      addDataPointsOLS();
-      statisticsCalcOLS(dur);
-    });
-});
-
-
-var tableExplanation = ["#sampleSize","#xMean","#yMean","#beta0","#beta1","#sse"];
-//Handles regression table highlighting and clicking
-$("#table_ols").delegate('td','click mouseover mouseleave', function(e) {
-  var col = $(this).index(),
-      curr = $("#table_ols colgroup").eq($(this).index());
-
-  if (col) {
-    if(e.type == 'mouseover' && !curr.hasClass("click")) {
-      curr.addClass("hover");
-    } else if (e.type == 'click') {
-      $(".explanation").css("display","none");
-      if(curr.hasClass("click")) {
-        $("#defaultRegresion").css("display","block");
-        curr.removeClass("click");
-      } else { 
-        $("colgroup").removeClass("click hover");
-        curr.addClass("click");
-        $(tableExplanation[col - 1]).fadeToggle();
-      }
-    } else {
-      curr.removeClass("hover");
-    }
-  };
-});
-
-
-//Draws SVG and resizes based upon window size (render)
-function drawOls() {
-  // constants
-  var parent = d3.select('#svg_ols'),
-      w = parent.node().clientWidth,
-      h = 500,
-      padding = 50;
-
-  //Update Scale Range
-  x_scale_ols.range([padding, (w - padding)]);
-  y_scale_ols.range([(h - padding), padding]);
-
-  //Update svg size
-  svg_ols.attr("width", w).attr("height", h);
-
-  //Update Axis
-  x_axis_group_ols.attr("transform", "translate(0," + (h - padding) + ")").call(x_axis_ols);
-  y_axis_group_ols.attr("transform", "translate(" + padding + ",0)").call(y_axis_ols);
-
-  //Update Clip Path
-  clip_ols.attr("x", padding).attr("y", padding).attr("width", w-2*padding).attr("height", h-2*padding);
-
-  //Update Axis Labels
-  xaxisTextOLS.attr("transform", "translate("+ (w/2) +","+(h-padding/4)+")");
-  yaxisTextOLS.attr("transform", "translate("+ (padding/4) +","+(h/2)+")rotate(-90)");
-
-  //Update regression table
-  $('#table_ols').css('width',w-2*padding);
-  statisticsCalcOLS(0);
-}
-
-//*******************************************************************************//
-//Correlation
-//*******************************************************************************//
+var quickTimes = [[0, 0.0005006790161132812], [1, 0.001049041748046875], [2, 0.0012874603271484375], [3, 0.0023126602172851562], [4, 0.00286102294921875], [5, 0.0032901763916015625], [6, 0.003933906555175781], [7, 0.004100799560546875], [8, 0.005626678466796875], [9, 0.005340576171875], [10, 0.0068187713623046875], [11, 0.007224082946777344], [12, 0.0076770782470703125], [13, 0.008487701416015625], [14, 0.010633468627929688], [15, 0.010347366333007812], [16, 0.009799003601074219], [17, 0.011014938354492188], [18, 0.011730194091796875], [19, 0.01239776611328125], [20, 0.012850761413574219], [21, 0.01316070556640625], [22, 0.014758110046386719], [23, 0.014281272888183594], [24, 0.017452239990234375], [25, 0.016689300537109375], [26, 0.015211105346679688], [27, 0.016689300537109375], [28, 0.01590251922607422], [29, 0.017976760864257812], [30, 0.018358230590820312], [31, 0.03371238708496094], [32, 0.019884109497070312], [33, 0.021314620971679688], [34, 0.02009868621826172], [35, 0.02014636993408203], [36, 0.021505355834960938], [37, 0.02429485321044922], [38, 0.02300739288330078], [39, 0.023508071899414062], [40, 0.02281665802001953], [41, 0.024199485778808594], [42, 0.02701282501220703], [43, 0.02624988555908203], [44, 0.025224685668945312], [45, 0.026535987854003906], [46, 0.027799606323242188], [47, 0.028705596923828125], [48, 0.02720355987548828], [49, 0.030803680419921875], [50, 0.03631114959716797], [51, 0.033545494079589844], [52, 0.031137466430664062], [53, 0.04391670227050781], [54, 0.03871917724609375], [55, 0.036716461181640625], [56, 0.03867149353027344], [57, 0.037217140197753906], [58, 0.03190040588378906], [59, 0.03609657287597656], [60, 0.033354759216308594], [61, 0.040149688720703125], [62, 0.034117698669433594], [63, 0.036454200744628906], [64, 0.03783702850341797], [65, 0.03533363342285156], [66, 0.039124488830566406], [67, 0.05822181701660156], [68, 0.039887428283691406], [69, 0.03821849822998047], [70, 0.04420280456542969], [71, 0.03952980041503906], [72, 0.039649009704589844], [73, 0.04246234893798828], [74, 0.04417896270751953], [75, 0.04284381866455078], [76, 0.04582405090332031], [77, 0.05431175231933594], [78, 0.1348257064819336]];
+//END HARDCODED DATA
 
 //Constants
-var lineWidth = 2;
-var data_corr = [];
-var keys_corr = [];
-var x_key = 0;
-var y_key = 0;
-var sf_corr = 0.25;
+var probDie = [{p:1/6},{p:1/6},{p:1/6},{p:1/6},{p:1/6},{p:1/6}];
+var countDie = [0,0,0,0,0,1];
+var expectedData = [average(countDie)];
 
-//Create scale functions
-var xScaleCorr = d3.scale.linear();
-var yScaleCorr = d3.scale.linear();
-var pScaleCorr = d3.scale.linear().domain([-1,0,1]).range(['#FF4A3C','#FFFFFF','#64BCFF']);
-//Bar Chart
-var xScaleBarCorr = d3.scale.linear().domain([-1, 1]);
+//Create SVG and SVG elements
+var svgDie = d3.select("#barDie").append("svg");
 
-//Define X axis
-var xAxisCorr = d3.svg.axis().scale(xScaleCorr).orient("bottom").ticks(0);
-//Bar Chart
-var xAxisBarCorr = d3.svg.axis().scale(xScaleBarCorr).orient("bottom").ticks(5);
-//Define Y axis
-var yAxisCorr = d3.svg.axis().scale(yScaleCorr).orient("left").ticks(0);
+//Create Container
+var containerDie = svgDie.append("g").attr('class','Theoretical');
 
-//Create SVG element
-var svgCorr = d3.select("#svgCorr").append("svg").attr("display", "inline-block");
-//Bar Chart
-var svgBarCorr = d3.select("#svgCorr").append("svg").attr("display", "inline-block");
+//yScale
+var yScaleDie = d3.scale.linear().domain([0,1]);
 
-//Create X axis
-var xAxisGroupCorr = svgCorr.append("g").attr("class", "x axis");
-//Bar Chart
-var xAxisGroupBarCorr = svgBarCorr.append("g").attr("class", "x axis");
+//xScale
+var xScaleDie = d3.scale.ordinal().domain([1,2,3,4,5,6]);
 
-//Create Y axis
-var yAxisGroupCorr = svgCorr.append("g").attr("class", "y axis");
+//xAxis
+var xAxisDie = d3.svg.axis().scale(xScaleDie).orient("bottom").ticks(0);
+var axisDie = svgDie.append("g").attr("class", "x axis");
 
-//Create Clip Path
-var clipCorr = svgCorr.append("clipPath").attr("id", "viewCorr").append("rect");
+//Drag function for coin bar chart
+var dragDie = d3.behavior.drag()
+         .origin(function(d,i) { return {x: 0, y: yScaleDie(d.p)};})  
+         .on('drag', function(d,i) {
+         						var y = Math.min(1,Math.max(0,yScaleDie.invert(d3.event.y)));
+     							var oldV = probDie[i].p;
+     							var change = y-oldV;
+     							probDie.map(function(x,index){
+											if(index==i) x.p=y;
+											else {
+												if(oldV==1) x.p= -change/5;
+												else x.p= x.p-change*x.p/(1-oldV);
+											}});
+     							updateDie();
+     							tipDie.show(d,this);
+     							countDie = [0,0,0,0,0,0];
+     							expectedData = [];
+     							maxXExpected = 200;
+     							expectation(expectedData,expectationCalc(probDie));
+     						})
 
-//Add Plot Titles
-var xaxisTextCorr = svgCorr.append("text").attr("text-anchor", "middle");                
-var yaxisTextCorr = svgCorr.append("text").attr("text-anchor", "middle");
-                    
-//Create tool tip
-var tipCorr = d3.tip().attr('class', 'd3-tip').offset([-10, 0]);
-$(window).on('mouseup', tipCorr.hide);
+//Create Rects
+var expectedRects = containerDie.selectAll("rect").data(probDie).enter().append("rect");
 
-//Create container for graph elements(data points and lines)
-var containerCorr = svgCorr.append("g").attr("clip-path", "url(#viewCorr)").call(tipCorr);
+//Create Labels
+var dieFaces = svgDie.select("g.axis").selectAll("g.tick").data(probDie).enter().append("image");
 
-//Drag functions
-var dragCorr = d3.behavior.drag() 
-    .origin(function(d) { 
-        return {x: d3.select(this).attr("cx"), y: d3.select(this).attr("cy")}; }) 
-    .on('drag', function(d) {
-        var r = parseFloat(d3.select(this).attr("r")),
-            x = Math.max(xScaleCorr.range()[0] + r, Math.min(xScaleCorr.range()[1] - r, d3.event.x)),
-            y = Math.max(yScaleCorr.range()[1] + r, Math.min(yScaleCorr.range()[0] - r, d3.event.y));
-        d3.select(this).attr('cx', x).attr('cy', y);
-        d[keys_corr[x_key]] = xScaleCorr.invert(x);
-        d[keys_corr[y_key]] = yScaleCorr.invert(y);
-        tipCorr.show(d,this);
-        corr_table_calc();})
+//Tool Tip
+var tipDie = d3.tip().attr('id', 'tipDie').attr('class', 'd3-tip').offset([-10, 0]);
 
-// Add data points to plot
-function add_data_corr() {
+//Update Coin Bar Chart
+function updateDie() {
 
-  // update axis labels
-  xaxisTextCorr.text(keys_corr[x_key]);
-  yaxisTextCorr.text(keys_corr[y_key]);
+  	tipDie.html(function(d,i) { return round(d.p,2);});
 
-  // update tool tip html
-  tipCorr.html(function(d,i) { 
-    return '<strong>' + keys_corr[x_key] + ': </strong>' + round(d[keys_corr[x_key]],2) + '<br>' +
-           '<strong>' + keys_corr[y_key] + ': </strong>' + round(d[keys_corr[y_key]],2); });
 
-  // update x axis
-  var x_min = d3.min(data_corr, function(d) { return +d[keys_corr[x_key]] }),
-      x_max = d3.max(data_corr, function(d) { return +d[keys_corr[x_key]] }),
-      x_offset = (x_max - x_min) * sf_corr;
-  xScaleCorr.domain([x_min - x_offset, x_max + x_offset]);
-  xAxisCorr.ticks(5);
-  xAxisGroupCorr.transition().call(xAxisCorr);
+	expectedRects
+			.attr("x",function(d,i) {return xScaleDie(i+1);})
+			.attr("y",function(d,i) {return yScaleDie(d.p);})
+			.attr("height",function(d,i) {return yScaleDie(1-d.p);})
+			.attr("width",xScaleDie.rangeBand())
+			.attr("id",function(d,i) {return i;})
+			.on('mousedown', function(d){tipDie.show(d,this)})
+			.on('mouseover', function(d){tipDie.show(d,this)})
+			.on('mouseout', tipDie.hide)
+			.call(dragDie);
 
-  // update y axis
-  var y_min = d3.min(data_corr, function(d) { return +d[keys_corr[y_key]] }),
-      y_max = d3.max(data_corr, function(d) { return +d[keys_corr[y_key]] }),
-      y_offset = (y_max - y_min) * sf_corr;
-  yScaleCorr.domain([y_min - y_offset, y_max + y_offset]);
-  yAxisCorr.ticks(5);
-  yAxisGroupCorr.transition().call(yAxisCorr);
+	$('#barDie').parent().on('mouseup', tipDie.hide);
 
-  // select all circles
-  var data = containerCorr.selectAll("circle.data")
-    .data(data_corr, function(d) { return +d.Index; });
-
-  // exit old circles
-  data.exit().remove();
-
-  // enter new circles
-  var data_enter = data.enter()
-    .append("circle")
-    .attr("r", 5)
-    .attr("class","data")
-    .call(dragCorr)
-    .on('mousedown', function(d) { tipCorr.show(d,this); })
-    .on('mouseover', function(d) { tipCorr.show(d,this); })
-    .on('mouseout', tipCorr.hide);
-
-  // transition circles
-  data_enter.transition()
-    .attr("cx", function(d) { return xScaleCorr(d[keys_corr[x_key]]); })
-    .attr("cy", function(d) { return yScaleCorr(d[keys_corr[y_key]]); });
-  data.transition()
-    .attr("cx", function(d) { return xScaleCorr(d[keys_corr[x_key]]); })
-    .attr("cy", function(d) { return yScaleCorr(d[keys_corr[y_key]]); });
-
-  // update correlation table
-  corr_table_calc();
+	svgDie.select(".axis").selectAll(".tick").remove();
+	dieFaces
+	      .attr("xlink:href", function(d,i) { return "../img/dice_"+(i+1)+".png"; })
+	      .attr("x", function(d,i) {return xScaleDie(i+1)-1/4*xScaleDie.rangeBand();})
+	      .attr("y", 0)
+	      .attr("width", 3/2*xScaleDie.rangeBand())
+	      .attr("height", 3/2*xScaleDie.rangeBand());
 }
 
-
-function reset_corr() {
-
-  // remove all circles
-  svgCorr.selectAll("circle").remove();
-
-  // clear axis ticks
-  xAxisCorr.ticks(0);
-  xAxisGroupCorr.transition().call(xAxisCorr);
-  yAxisCorr.ticks(0);
-  yAxisGroupCorr.transition().call(yAxisCorr);
-
-  // clear axis labels
-  xaxisTextCorr.text("");
-  yaxisTextCorr.text("");
-
-  // clear correlation table
-  for (var i = 0; i < 4; i++) {
-    for (var j = 0; j < 4; j++) {
-      $("#table_corr tr").eq(i + 1).children().eq(j + 1)
-          .html("")
-          .css("background","#FFFFFF")
-          .removeClass("click_corr");
-    };
-  };
-
-  // clear regression lines
-  regressionLineCorrX.attr("stroke", "transparent");
-  regressionLineCorrY.attr("stroke", "transparent");
-  cosineCorr.attr("fill", "transparent");
-  barCorr.attr("stroke", "transparent");
+//Handles Die Roll
+function roll(die){
+	var num = Math.random();
+	var cumProb = cumsum(probDie);
+	if (num<cumProb[0]) {
+		die.css("background-image", "url(../img/dice_1.png");
+		countDie[0] = countDie[0] + 1;
+	} else if (num<cumProb[1]) {
+		die.css("background-image", "url(../img/dice_2.png");
+		countDie[1] = countDie[1] + 1;
+	} else if (num<cumProb[2]) {
+		die.css("background-image", "url(../img/dice_3.png");
+		countDie[2] = countDie[2] + 1;
+	} else if (num<cumProb[3]) {
+		die.css("background-image", "url(../img/dice_4.png");
+		countDie[3] = countDie[3] + 1;
+	} else if (num<cumProb[4]) {
+		die.css("background-image", "url(../img/dice_5.png");
+		countDie[4] = countDie[4] + 1;
+	} else {
+		die.css("background-image", "url(../img/dice_6.png");
+		countDie[5] = countDie[5] + 1;
+	}
+	updateDie();
+	expectedData.push(average(countDie));
+	expectation(expectedData,expectationCalc(probDie));
 }
 
-
-//Append a defs (for definition) element to your SVG
-var defs = svgBarCorr.append("defs");
-//Append a linearGradient element to the defs and give it a unique id
-var linearGradient = defs.append("linearGradient")
-    .attr("id", "linear-gradient");
-//Horizontal gradient
-linearGradient
-    .attr("x1", "0%")
-    .attr("y1", "0%")
-    .attr("x2", "100%")
-    .attr("y2", "0%");
-//Append multiple color stops by using D3's data/enter step
-linearGradient.selectAll("stop") 
-    .data( pScaleCorr.range() )                  
-    .enter().append("stop")
-    .attr("offset", function(d,i) { return i/(pScaleCorr.range().length-1); })
-    .attr("stop-color", function(d) { return d; });
-//Add rectangle legend
-var legend = svgBarCorr.append("rect")
-    .style("fill", "url(#linear-gradient)")
-    .attr("stroke-width",lineWidth)
-    .attr('stroke','black')
-    .moveToBack();
-
-
-
-// calculates correlation coeficients given dataset
-function corr_coef_calc(xdata, ydata) {
-  var n = xdata.length,
-      xmean = d3.mean(xdata),
-      ymean = d3.mean(ydata),
-      syy = 0,
-      sxx = 0,
-      sxy = 0;
-  for (var i = 0; i < n; i++) {
-    syy += Math.pow((ydata[i] - ymean), 2);
-    sxx += Math.pow((xdata[i] - xmean), 2);
-    sxy += (xdata[i] - xmean) * (ydata[i] - ymean);
-  }
-  var b1x = syy / sxy,
-      b0x = ymean - b1x * xmean,
-      b1y = sxy / sxx,
-      b0y = ymean - b1y * xmean,
-      p = sxy / (Math.sqrt(sxx) * Math.sqrt(syy));
-
-  var sse = 0;
-  for (var i = 0; i < n; i++) {
-    sse += Math.pow((xdata[i] * b1y + b0y - ydata[i]), 2);
-  }
-  var tscore = b1y * Math.sqrt(sxx) * (n - 2) / sse,
-      pvalue = jStat.ttest(tscore, n, 2),
-      sig = pvalue < 0.05;
-
-  return [p, b0x, b1x, xmean, b0y, b1y, ymean];
-}
-
-// regression line, arc, bar elements
-var regressionLineCorrX = containerCorr.append("line"),
-    regressionLineCorrY = containerCorr.append("line"),
-    cosineCorr = containerCorr.append("path"),
-    barCorr = svgBarCorr.append('line');
-
-// updates correlation matrix, regression lines and correlation arc
-function corr_table_calc() {
-  var variables;
-  for (var i = 0; i < keys_corr.length - 1; i++) {
-    for (var j = 0; j < keys_corr.length - 1; j++) {
-      // get data
-      var xdata = extractColumn(data_corr, keys_corr[i]),
-          ydata = extractColumn(data_corr, keys_corr[j]),
-          result = corr_coef_calc(xdata, ydata);
-      // return current correlation
-      if ((x_key == i) && (y_key == j)) variables = result;
-      // update html and background color
-      $("#table_corr tr").eq(i + 1).children().eq(j + 1)
-          .html(round(result[0], 2))
-          .css("font-size", "10px")
-          .css("background", pScaleCorr(result[0]));
-    };
-  };
-  if (variables == null) return;
-  var p = variables[0], 
-      b0x = variables[1], 
-      b1x = variables[2], 
-      xmean = variables[3], 
-      b0y = variables[4], 
-      b1y = variables[5], 
-      ymean = variables[6];
-
-  //Draw the line
-  var x1 = xScaleCorr.range()[0],
-      x2 = xScaleCorr.range()[1];
-
-  regressionLineCorrX
-     .attr("x1", x1)
-     .attr("y1", yScaleCorr(b0x + b1x * xScaleCorr.invert(x1)))
-     .attr("x2", x2)
-     .attr("y2", yScaleCorr(b0x + b1x * xScaleCorr.invert(x2)))
-     .attr("stroke-width", 2 * lineWidth)
-     .attr("stroke", "black")
-     .moveToBack();
-
-  regressionLineCorrY
-     .attr("x1", x1)
-     .attr("y1", yScaleCorr(b0y +b1y*xScaleCorr.invert(x1)))
-     .attr("x2", x2)
-     .attr("y2", yScaleCorr(b0y +b1y*xScaleCorr.invert(x2)))
-     .attr("stroke-width", 2 * lineWidth)
-     .attr("stroke", "black")
-     .moveToBack();
-
-
-  var y_range = yScaleCorr.range()[1] - yScaleCorr.range()[0],
-      y_domain = yScaleCorr.domain()[1] - yScaleCorr.domain()[0],
-      y_ratio = y_range / y_domain;
-
-  var x_range = xScaleCorr.range()[1] - xScaleCorr.range()[0],
-      x_domain = xScaleCorr.domain()[1] - xScaleCorr.domain()[0],
-      x_ratio = x_range / x_domain;
-
-  var start_angle = Math.acos(-b1x * y_ratio / Math.hypot(x_ratio, b1x * y_ratio)),
-      end_angle = Math.acos(-b1y * y_ratio / Math.hypot(x_ratio, b1y * y_ratio)),
-      arc = d3.svg.arc()
-          .innerRadius(0)
-          .outerRadius(100)
-          .startAngle(start_angle)
-          .endAngle(end_angle);
-
-  cosineCorr.attr("d", arc)
-            .attr('transform','translate('+xScaleCorr(xmean)+','+yScaleCorr(ymean)+')')
-            .attr('fill',pScaleCorr(p))
-            .moveToBack();
-
-  barCorr.attr("x1", xScaleBarCorr(p))
-         .attr("x2", xScaleBarCorr(p))
-         .attr("stroke-width", lineWidth)
-         .attr("stroke", "black");
-}
-
-
-
-// change species
-$('#data_corr').change(function(e){
-    var species = []
-    $('input[name = "correlation"]:checked').each(function() { return species.push($(this).val()); });
-    d3.csv('data/iris.csv', function(data){
-      data_corr = data.filter(function(d) { return species.indexOf(d['Species']) != -1; });
-      keys_corr = d3.keys(data_corr[0])
-      if (data_corr.length) add_data_corr();
-      else                  reset_corr();
+$('#rollOne').click(function() {
+	var die = $("#die");
+    die.animatecss('blur-out', 500, function() {
+    	die.css("font-size", "30px");
+    	roll(die);
+        die.removeClass('blur-out');
     });
 });
 
-// correlation table highlighting
-$("#table_corr").delegate('td','click mouseover mouseleave', function(e) {
-
-  // get column, row, cell
-  var col = $(this).index(),
-      row = $(this).parent().index(),
-      cell = $("#table_corr tr").eq(row).children().eq(col);
-
-  // add hover and click classes
-  if (col && row) {
-    if((e.type == 'mouseover') && !cell.hasClass("click_corr")) {
-      cell.addClass("hover_corr");
-    } else if (e.type == 'click') {
-      $("td").removeClass("click_corr hover_corr");
-      cell.addClass("click_corr");
-      x_key = col - 1;
-      y_key = row - 1;
-      add_data_corr();
-    } else {
-      cell.removeClass("hover_corr");
-    }
-  };
+$('#rollHundred').click(function() {
+	var die = $("#die");
+	var count = 0;
+	var interval = setInterval(function() {
+		die.animatecss('blur-out', 15, function() {
+	    	die.css("font-size", "30px");
+	    	roll(die);
+	        die.removeClass('blur-out');
+	    });
+	    if (++count === 100){
+        clearInterval(interval);
+       	}   
+	}, 15);
 });
 
-
-//Draws SVG and resizes based upon window size
-function drawCorr() {
-
-  // constants
-  var parent = d3.select('#svgCorr'),
-      w = parent.node().clientWidth,
-      h = 500,
-      hBar = 70,
-      padding = 50;
-
-  //Update Scale Range
-  xScaleCorr.range([padding, (w - padding)]);
-  xScaleBarCorr.range([padding, (w - padding)]);
-  yScaleCorr.range([(h - padding), padding]);
-
-  //Update svg size
-  svgCorr.attr("width", w).attr("height", h);
-  svgBarCorr.attr("width", w).attr("height", hBar);
-
-  //Update Axis
-  xAxisGroupCorr.attr("transform", "translate(0," + (h - padding) + ")").call(xAxisCorr);
-  xAxisGroupBarCorr.attr("transform", "translate(0," + (hBar - padding) + ")").call(xAxisBarCorr);
-  yAxisGroupCorr.attr("transform", "translate(" + padding + ",0)").call(yAxisCorr);
-
-  //Update Bar Chart
-  legend.attr("x", padding).attr("y", lineWidth).attr("width", w-2*padding).attr("height", hBar-padding-lineWidth);
-  barCorr.attr("y1", lineWidth).attr("y2", hBar-padding);
-
-  //Update Clip Path
-  clipCorr.attr("x", padding).attr("y", padding).attr("width", w-2*padding).attr("height", h-2*padding);
-
-  //Update Axis Labels
-  xaxisTextCorr.attr("transform", "translate("+ (w/2) +","+(h-padding/4)+")");
-  yaxisTextCorr.attr("transform", "translate("+ (padding/4) +","+(h/2)+")rotate(-90)");
-
-  //Update data points and line
-  add_data_corr();
+//Cumulative Sum function for array
+function cumsum(array){
+	var resultArray = [];
+	array.reduce(function(a,b,i) { return resultArray[i] = a+b.p; },0);
+	return resultArray;
 }
+//Returns total samples and average at that point
+function average(data) {
+	var total = data.reduce(function(a, b){return a+b;},0);
+	var sum = data.reduce(function(a, b, i){return a+b*(i+1);},0);
+	return [total,sum/total]; 
+}
+//Returns expectation of die based on probability
+function expectationCalc(data) {
+	return data.reduce(function(a, b, i){return a+b.p*(i+1);},0);
+}
+//Returns probability from count data
+function countToProb(data) {
+	var total = Math.max(1,data.reduce(function(a, b){return a+b;},0));
+	return data.map(function(x){return x/total;});
+}
+
+//Expectation SVG and elements
+var maxXExpected = 200;
+var expectedPlot = d3.select("#plotDie").append("svg");
+var xaxisDie = expectedPlot.append("g").attr("class", "x axis");
+var xaxisTextDie = expectedPlot.append("text").attr("text-anchor", "middle").text("Number of Rolls");
+var yaxisDie =expectedPlot.append("g").attr("class", "y axis");
+var yaxisTextDie = expectedPlot.append("text").attr("text-anchor", "middle").text("Value");
+var pathExpected = expectedPlot.append("path").attr("id", "expected");
+var pathActual = expectedPlot.append("path").attr("id", "actual");
+var pathTest = expectedPlot.append("path").attr("id", "test");
+    
+//X scale 
+var xScaleExpected = d3.scale.linear().domain([1, maxXExpected]);
+
+//Y Scale
+var yScaleExpected = d3.scale.linear().domain([0, 0.5]);
+
+//Define X axis
+var xAxisExpected = d3.svg.axis().scale(xScaleExpected).orient("bottom").ticks(3);
+//Define Y axis
+var yAxisExpected = d3.svg.axis().scale(yScaleExpected).orient("left").ticks(6);
+
+
+//Update error plot
+function expectation(data, prob){
+	var line = d3.svg.line()
+	  .x(function(d) { return xScaleExpected(d[0])})
+	  .y(function(d) { return yScaleExpected(d[1])})
+	  .interpolate("linear");
+	if(data.length>maxXExpected*0.9){
+		maxXExpected = maxXExpected*1.5;
+	}
+	xScaleExpected.domain([1,maxXExpected]);
+	expectedPlot.select(".x.axis")
+			.transition()
+			.call(xAxisExpected.ticks(3));
+	pathExpected
+	  .datum(bubbleTimes)
+	  .attr("d", line);
+	pathActual
+	  .datum(insertTimes)
+	  .attr("d", line);
+	pathTest
+	  .datum(mergeTimes)
+	  .attr("d", line);
+}
+
+var tipDieFocus = d3.tip().attr('id', 'tipDieFocus').attr('class', 'd3-tip').offset([0, 10]).direction('e');
+
+var focus = expectedPlot.append("g").style("display", "none");
+
+focus.append("rect").attr("y", 0).style('fill','white').style('opacity','0.75');
+
+focus.append("line").attr('id','focusLine').style("stroke-dasharray", ("2, 2"));
+
+focus.append("circle").attr("r", 5).attr('id','expectedCircle');
+
+focus.append("circle").attr("r", 5).attr('id','averageCircle');
+focus.append("circle").attr("r", 5).attr('id','testCircle');
+
+
+expectedPlot.on("mouseover", mousemove).on("mouseout", mousemove).on("mousemove", mousemove);
+
+function mousemove() {
+	var x = round(xScaleExpected.invert(d3.mouse(this)[0]),0);
+	var y = yScaleExpected.invert(d3.mouse(this)[1]);
+	if (x>0 && x< 80 && y>=0 && y<=6) { //modified bounds for functions
+	//if (x>0 && x<expectedData.length+1 && y>=0 && y<=6) {
+		focus.style("display", null)
+	    var y = expectedData[x-1][1];
+	    focus.select('#expectedCircle').attr("cx", xScaleExpected(x)).attr('cy',yScaleExpected(bubbleTimes[x][1]));
+	    focus.select('#averageCircle').attr("cx", xScaleExpected(x)).attr('cy',yScaleExpected(insertTimes[x][1]));
+	    focus.select('#testCircle').attr("cx", xScaleExpected(x)).attr('cy',yScaleExpected(mergeTimes[x][1]));
+	    //focus.select('#averageCircle').attr("cx", xScaleExpected(x)).attr('cy',yScaleExpected(0.1));
+	    focus.select('rect').attr("x", xScaleExpected(x)).attr("height",yScaleExpected(0)-0).attr("width", xScaleExpected(maxXExpected - x));
+	    focus.select('line').attr("x1", xScaleExpected(x)).attr("y1", yScaleExpected(6)).attr("x2", xScaleExpected(x)).attr("y2", yScaleExpected(0));
+	    xaxisDie.call(xAxisExpected.tickValues([x]));
+		tipDieFocus.html(function(d) { 
+			return 'Average: <span id="avgFocus">'+round(bubbleTimes[x][1],3)+'</span><br>'+
+				   'Test: <span id="testFocus">' + round(insertTimes[x][1],3) + '</span><br>' + 
+				   'Expect: <span id="expFocus">'+round(mergeTimes[x][1],3)+'</span>';});
+				   
+	    tipDieFocus.show(document.getElementById("expectedCircle"));
+	} else {
+		focus.style("display", "none");
+		tipDieFocus.hide();
+		xaxisDie.call(xAxisExpected.tickValues(null));
+	}
+}
+
+//Update SVG based on width of container
+function drawDie(){
+	//Constants Bar Die
+    var width = d3.select('#barDie').node().clientWidth;
+    var height = 150;
+    var padDie = 20;
+
+    //Update SVG
+    svgDie.attr("width", width).attr("height", height).call(tipDie);
+
+    //Update Scales
+	yScaleDie.range([height-2*padDie, 0]);
+	xScaleDie.rangeRoundBands([0, width - 2*padDie], .5);
+
+	//Update Container and Axis
+	axisDie.attr("transform", "translate(" + padDie + "," + (height-2*padDie+1) + ")").call(xAxisDie);
+	containerDie.attr("transform", "translate(" + padDie + ","+0+")");
+
+	//Update Rects
+	updateDie();
+
+	//Constants Expectation Die
+    var w = d3.select('#plotDie').node().clientWidth;
+    var h = 550;
+    var padExp = 35;
+
+    //Update SVG
+	expectedPlot.attr("width", w).attr("height", h).style("cursor",	"crosshair").call(tipDieFocus);
+
+	//Update Scales
+	xScaleExpected.range([padExp, (w - padExp)]);
+	yScaleExpected.range([(h - padExp), padExp]);
+
+	//Update Axis
+	xaxisDie.attr("transform", "translate(0," + (h - padExp) + ")").call(xAxisExpected);
+	yaxisDie.attr("transform", "translate(" + padExp + ",0)").call(yAxisExpected);
+
+	//Update Labels
+	xaxisTextDie.attr("transform", "translate("+ (w/2) +","+(h)+")")
+	yaxisTextDie.attr("transform", "translate("+ (padExp/4) +","+(h/2)+")rotate(-90)")
+
+	//Update Paths
+	expectation(expectedData,expectationCalc(probDie));
+}
+
+//*******************************************************************************//
+//Combinatorics
+//*******************************************************************************//
+//Adapted from: https://bl.ocks.org/mbostock/4339083
+//Starting values
+var i = 0,
+    dur = 750,
+    combinations = false,
+    size = 4,
+    number =4,
+    distNodes = 1,
+    root = [],
+    branches = 1;
+
+//Create SVG
+var svgComb = d3.select("#svgComb").append("svg");
+
+//Create Container
+var containerComb = svgComb.append("g");
+
+//Create Tree Layout
+var tree = d3.layout.tree();
+
+//Diagonal function
+var diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+
+
+//Initiates a tree of certain depth
+function drawTree(level) {
+  var source = {name:"", children:[]};
+  var colors = ['A','B','C','D'];
+  distNodes = tree.size()[1]/Math.max(1,size);
+
+  //Creates JSON object of all possible permutations without replacement of first 
+  //'num' number of elemenets from 'color'.  This is a recursive implementation.
+  //TODO: change from permutations to all possible combinations
+  function permutationCalc(obj,num,color) {
+    for (var i = 0; i < num; i++) {
+      obj.children.push({name:obj.name+color[i], children:[]})
+    }
+    obj.children.map(function(x,i){
+      var remainingColor = color.slice()
+      remainingColor.splice(i, 1);
+      permutationCalc(x,num-1,remainingColor)});
+    return obj;
+  }
+
+  function possibilityCalc(obj, num, color, depth) {
+    if (depth === 0) return obj; //no more to calculate
+    for (var i = 0; i < num; i++) {
+      obj.children.push({name:obj.name+color[i], children:[]})
+      //obj.children.push({name:depth, children:[]})
+    }
+    obj.children.map(function(x,i){
+      //var remainingColor = color.slice()
+      //remainingColor.splice(i, 1);
+      possibilityCalc(x,num,color, depth - 1)});
+    return obj;
+  }
+
+  //root = permutationCalc(Object.assign({}, source),size,colors);
+  root = possibilityCalc(Object.assign({}, source),size,colors, size);
+  root.x0 = tree.size()[0] / 2;
+  root.y0 = 0;
+
+  //Hides all children below depth
+  function collapse(d, depth) {
+    if (d.children && depth>=number) {
+      d._children = d.children;
+      d._children.forEach(function(x){collapse(x,depth+1)});
+      d.children = null;
+    } else {
+      d.children.forEach(function(x){collapse(x,depth+1)});
+    }
+    d._top = true;
+  }
+  collapse(root,level);
+  update(0);
+}
+
+
+//ReDraws Tree Layout
+function update(duration) {
+
+  // Compute the new tree layout nodes.
+  var nodes = tree.nodes(root).reverse();
+
+  //Update nodes.x and nodes.x0 for combinations
+  function removeRepeats(nodeArray, myHashFunction) {
+    var hashmap = new Map();
+    nodeArray.map(function(x){
+      var key = myHashFunction(x.name);
+      if(hashmap.has(key)) {
+        var value = hashmap.get(key);
+        value.push(x);
+        hashmap.set(key,value);
+      } else {
+        hashmap.set(key,[x]);
+      }
+    });
+    //console.log(hashmap);
+    hashmap.forEach(function (value,key) {
+      var len = value.length;
+      var avgX = value.reduce(function(a,b){return a+b.x},0)/len;
+      var avgX0 = value.reduce(function(a,b){return a+b.x0},0)/len;
+      value.map(function(x,i){
+        if(i!=len-1) x._top = false
+        x.x = avgX; 
+        x.x0 = avgX0;
+        //Hard coded for overlap when size is four
+        //if(key==hashAnagram('AD')) x.x-=10;
+        //if(key==hashAnagram('BC')) x.x+=10;
+      });
+    });
+  };
+  if(branches === 3) removeRepeats(nodes, hashAnagram);
+  else if(branches === 2) removeRepeats(nodes, hashAnagram2);
+  else if(branches === 1) removeRepeats(nodes, hashLength);
+  else             nodes.map(function(x){ x._top = true;});
+
+  //Compute new tree layout Links.
+  var links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  // Location of circle y coordinate!!
+  nodes.forEach(function(d) { 
+    if (number === 4) {
+      d.y = 1.5*distNodes - (4 ** (4 - d.depth)/3) * distNodes/100; 
+    } else if (number === 3) {
+      d.y = 1.8*distNodes - (3 ** (4 - d.depth)/2) * distNodes/40; 
+    } else if (number === 2) {
+      d.y = 1.95*distNodes - (2 ** (4 - d.depth) - 1) * distNodes/15; 
+    } else {
+      d.y = d.depth * distNodes;
+    }
+  });
+
+  // Update the nodes…
+  var node = containerComb.selectAll("g.node")
+      .data(nodes, function(d) { return d.name });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d,i) { 
+        if(typeof(d.parent)!='undefined')  return "translate(" + d.parent.y0 + "," + d.parent.x0 + ")";
+        else      return  "translate(" + d.y0 + "," + d.x0 + ")";
+      });
+
+
+  nodeEnter.each(function(d,i) {
+    for (var j = d.name.length; j >= 0; j--) { //adds huge rectangle back in
+    //for (var j = 0; j >= 0; j--) {
+      var length = 1e-6; //stand in for radius
+      var cx = 0; //stand in for circle center
+      //var cx = j * 9; //stand in for circle center
+      /*
+      d3.select(this).append("circle")
+          .attr("r", 1e-6)
+          .attr("cx",j*9) //location of circle center!!!
+          .attr('class',d.name[j]);
+      */
+      d3.select(this).append("rect")
+          .attr("x", cx)
+          .attr("y", 0)
+          .attr("width",length) //location of circle center!!!
+          .attr("height",length) //location of circle center!!!
+          .attr('class',d.name[j]);
+    };
+    //console.log(d3.select(this));
+  });
+
+  nodeEnter.append("text")
+      .attr("x", -10)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "end")
+      .text(function(d) { return d.name })
+      .style("fill-opacity", 1e-6);
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+  //print the sizes
+  nodeUpdate.selectAll("rect").each(function(d,i){
+    //console.log(d,i);
+    //console.log(d3.select(this)
+    //d3.select(this).attr("r", 4.5 * (2 ** (3 - d.name.length)));
+    var newHeight = 10;
+    if (number === 4) { //this is how to reanimate based on clicks
+      newHeight = 4 * (4 ** (3 - d.name.length))/3;
+    } else if (number === 3) { //this is how to reanimate based on clicks
+      newHeight = 6 * (3 ** (3 - d.name.length))/2;
+    } else if (number === 2) {
+      newHeight = 10 * (2 ** (3 - d.name.length))/1;
+    } 
+    var newWidth = newHeight;
+    if (combinations) newWidth = Math.log(newHeight);
+    d3.select(this)
+      .transition()
+      .duration(dur)
+      .attr("y", -newHeight/2)
+      .attr("width", newWidth)
+      .attr("height", newHeight);
+  });
+
+  //Text is always invisible??
+  //nodeUpdate.select("text")
+      //.style("fill-opacity", function(d) { return d._top ? 1 : 1e-6; });
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+      .duration(duration)
+      .attr("transform", function(d,i) { 
+        if(typeof(d.parent)!='undefined')  return "translate(" + d.parent.y + "," + d.parent.x + ")";
+        else      return  "translate(" + d.y + "," + d.x + ")";
+      })
+      .remove();
+
+  //nodeExit.select("circle")
+      //.attr("r", 1e-6);
+  nodeExit.select("rect")
+      .attr("y", 0)
+      .attr("width", 1e-6)
+      .attr("height", 1e-6);
+
+  nodeExit.select("text")
+      .style("fill-opacity", 1e-6);
+
+  // Update the links…
+  var link = containerComb.selectAll("path.link")
+      .data(links, function(d) { return d.target.name; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+      .attr("class", "link")
+      .style("visibility", "hidden")
+      .attr("d", function(d) {
+        var o = {x: d.source.x0, y: d.source.y0};
+        return diagonal({source: o, target: o});
+      });
+
+  // Transition links to their new position.
+  link.transition()
+      .duration(duration)
+      .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+      .duration(duration)
+      .attr("d", function(d) {
+        var o = {x: d.source.x, y: d.source.y};
+        return diagonal({source: o, target: o});
+      })
+      .remove();
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+}
+
+//Display nodes to the level of depth
+function displayChildren(){
+  containerComb.selectAll("g.node").each(function(d,i){
+    if (d.depth + 1 == number && !d.children) {
+        d.children = d._children;
+        d._children = null;
+    } else if(d.depth == number) {
+      d._children = d.children;
+      d.children = null;
+    }
+  })
+}
+
+//Combinatoric Functions
+//Calculates number of permutations of r items out of n elements
+function nPr(n,r) {
+  var result = 1;
+  for (var i = 0; i < r; i++) {
+    result = result*(n-i);
+  };
+  return result;
+}
+
+//Calculates number of combinations of r items out of n elements
+function nCr(n,r) {
+  var result = 1;
+  for (var i = 0; i < r; i++) {
+    result = result*(n-i)/(i+1);
+  };
+  return result;
+}
+
+//Hash Code unique for each anagram
+function hashAnagram(s){
+  //return s.split("").sort().reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
+  return s.replace(/B/g, 'C'); //should do the trick I think
+  //TODO: create 4 branch choices, since that will mitigate the problem I have
+  //return s.length;
+}
+
+function hashAnagram2(s) {
+  return s.replace(/A/g, 'B').replace(/D/g, 'C');
+}
+
+function hashLength(s) { return s.length; } //one liner for all being same branch
+
+//Handles permutation/combination radio buttons
+$("input[name='radioComb']").on("change", function () {
+    combinations = (this.value==='true');
+    $('.explanationComb').toggle();
+    update(dur); //
+});
+
+//Handles Input on size
+//Note: will change this so that this swaps between 1 and 3 things like combo.
+$('#sizeComb').change(function () {
+    var newSize = parseInt($(this).find("option:selected").text());
+    /*
+    var tickArray = Array.apply(null, {length: newSize+1}).map(Number.call, Number)
+    $("#number").slider('destroy');
+    $("#number").slider({
+      value: 0,
+      max: newSize,
+      ticks: tickArray,
+      ticks_labels: tickArray
+    }).on('change', updateNumber);
+    */
+    branches = newSize;
+    //number = 0;
+    //drawTree(0);
+    update(dur);
+});
+
+//Update Number Input
+function updateNumber() {
+  oldNumber = number;
+  number =  $("#number").slider('getValue');
+  update(dur);
+  //if(Math.abs(number-oldNumber)>1) {
+    //drawTree(0);
+    //update(0);
+  //} else {
+    //displayChildren();
+  //}
+};
+
+//Draw SVG and update based on width
+function drawComb(){
+  //Width, Height, Margin
+  var margin = {top: 40, right: 40, bottom: 40, left: 40},
+      width = d3.select("#svgComb").node().clientWidth - margin.right - margin.left,
+      height = 500 - margin.top - margin.bottom;
+
+  //Update SVG
+  svgComb.attr("width", width + margin.right + margin.left).attr("height", height + margin.top + margin.bottom);
+
+  //Update Container
+  containerComb.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  //Update Tree Size
+  tree.size([height, width]);
+
+  //Update Slider Width
+  $("#number").css('width',width).css('margin-left',margin.left);
+  //var tickArray = Array.apply(null, {length: (size+1)}).map(Number.call, Number)
+  var tickArray = [2,3,4];  //keep this fixed
+  //console.log(tickArray);
+  $("#number").slider('destroy');
+  $("#number").slider({
+      value: number,
+      max: size,
+      ticks: tickArray,
+      ticks_labels: tickArray
+    }).on('change', updateNumber);
+
+  //Update Nodes
+  drawTree(0);
+  update(0);
+}
+
 
 
 //*******************************************************************************//

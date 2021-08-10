@@ -17,6 +17,13 @@
     <!-- Scrolling CSS -->
     <link href="../css/scrolling-nav.css" rel="stylesheet">
 
+    <!-- Slider CSS -->
+    <link href="../css/bootstrap-slider.min.css" rel="stylesheet">
+
+    <!-- Select CSS -->
+    <link href="../css/bootstrap-select.min.css" rel="stylesheet">
+
+
     <!-- Off Canvas CSS -->
     <link href="../css/jasny-bootstrap.min.css" rel="stylesheet">
 
@@ -118,107 +125,33 @@
 
     <!-- Services Section -->
     <section id="first" class="first-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-4">
-                    <h1>Ordinary Least Squares</h1>
-                    <hr>
-                    <p>Ordinary least squares (OLS) is a method for estimating the unknown parameters in a linear regression model.  The goal of this method is to determine the linear model that minimizes the sum of the squared error between the observations in a dataset and those predicted by the model. Explore the OLS method through the famous <a href="https://en.wikipedia.org/wiki/Anscombe%27s_quartet">Anscombe's Quartet</a> dataset.</p>
-                    <ol>
-                        <li>
-                            <p>Choose one of the quartets to investigate.</p>
-                            <form id="datasetsOls">
-                                <label class="radio-inline">
-                                    <input type="radio" name="ols" value="0">I
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="ols" value="1">II
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="ols" value="2">III
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="ols" value="3">IV
-                                </label>
-                            </form>
-                        </li>
-                        <li>
-                            <p>Drag and drop data points to explore how this affects the OLS line.</p>
-                        </li>
-                    <!-- <div id='fileInputOls' class="fileinput fileinput-new input-group" data-provides="fileinput">
-                      <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
-                      <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span><input type="file" name="..."></span>
-                    </div> -->
-                    <!-- <div class="btn btn-default" id="reset">Reset</div> -->
-                        <li>
-                            <p>Click on a column of the regression table to learn more about this parameter.</p>
-                        </li>
-                    </ol>
-                    <div id="defaultRegresion" class="explanation">
-                    </div>
-                    <div id="sampleSize" class="explanation" style="display:none">
-                        <p>\(n\) is the sample size. This is simply the number of data points in the given dataset.</p>
-                    </div>
-                    <div id="xMean" class="explanation" style="display:none">
-                        <p>\(\bar{x}\) is the mean value of the x data. It is defined mathematically as the following:</p>
-                        $$\bar{x} = \sum_{i=1}^{n}\dfrac{x_{i}}{n}$$
-                    </div>
-                    <div id="yMean" class="explanation" style="display:none">
-                        <p>\(\bar{y}\) is the mean value of the y data. It is defined mathematically as the following:</p>
-                        $$\bar{y} = \sum_{i=1}^{n}\dfrac{y_{i}}{n}$$     
-                    </div>
-                    <div id="beta0" class="explanation" style="display:none">
-                        <p>\(\hat{B_{0}}\) is the y intercept of the regression line.  The current estimate has a variance of <span id="beta0STD">__</span>.  It is defined mathematically as the following:</p>
-                        $$\hat{B_{0}} = \bar{y} - \hat{B_{1}}\bar{x}$$     
-                    </div>
-                    <div id="beta1" class="explanation" style="display:none">
-                        <p>\(\hat{B_{1}}\) is the slope of the regression line.  The current estimate has a variance of <span id="beta1STD">__</span>.  It is defined mathematically as the following:</p> 
-                        $$\hat{B_{1}} = \dfrac{S_{xy}}{S_{xx}}$$
-                    </div>
-                    <div id="sse" class="explanation" style="display:none">
-                        <p>\(SSE\) is an abbreviation for the sum of squared errors which is the sum of the square residuals. It is defined mathematically as the following:</p> 
-                        $$SSE = \sum_{i=1}^{n}\Big{(}y_{i} - \big{(}\hat{B_{0}} + \hat{B_{1}}x_{i}\big{)}\Big{)}^{2}$$
+    <div class="container">
+        <div class="row">
+            <div id="plotDie" class="col-xs-8">
+            </div>
+            <div class="col-xs-4">
+                <h1>Expectation</h1>
+                <hr>
+                <p>The expected value of an experiment is the probability-weighted average of all possible values.  It is defined mathematically as the following:</p>
+                $$E[X] = \sum_{x \in X}xP(x)$$
+                <p>The law of large numbers states that the average result from a series of trials will converge to the expected value. Roll the die to see convergence to its expected value.</p>
+                <div id="dieWrapper">
+                    <div id="die"></div>
+                    <div id="dieButtons">
+                        <div class="btn btn-default" id="rollOne">Roll the Die</div>
+                        <div class="btn btn-default" id="rollHundred">Roll 100 times</div>
                     </div>
                 </div>
-                <div class="col-xs-8">
-                    <div id="svg_ols"></div>
-                    <table id="table_ols" style="cursor:pointer" class="table table-bordered">
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                      <tbody>
-                        <tr>
-                            <td></td>
-                            <td>\(\displaystyle{n}\)</td>
-                            <td>\(\displaystyle{\bar{\cssId{xMEAN}{x}}}\)</td>
-                            <td>\(\displaystyle{\bar{\cssId{yMEAN}{y}}}\)</td>
-                            <td>\(\displaystyle{\hat{\cssId{BETA0}{B_{0}}}}\)</td>
-                            <td>\(\displaystyle{\hat{\cssId{BETA1}{B_{1}}}}\)</td>
-                            <td>\(\displaystyle{SSE}\)</td>
-                        </tr>
-                        <tr>
-                            <td>Model</td>
-                            <td id="sampleSizeValue"></td>
-                            <td id="xMeanValue"></td>
-                            <td id="yMeanValue"></td>
-                            <td id="beta0Value"></td>
-                            <td id="beta1Value"></td>
-                            <td id="sseValue"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                </div>
+                <p>Change the theoretical probability of the die to see how that changes the average and expected value.</p>
+                <div id="barDie"></div>
             </div>
         </div>
-        <div class="nextSection">
-            <a class="page-scroll" href="#second">
-                <img src="../img/nextSection.png" width="50px"/>
-            </a>
-        </div>
+    </div>
+    <div class="nextSection">
+        <a class="page-scroll" href="#third">
+            <img src="../img/nextSection.png" width="50px"/>
+        </a>
+    </div>
     </section>
 
     <!-- Contact Section -->
@@ -226,75 +159,41 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-8">
-                     <div id="svgCorr"></div>
+                     <div id='svgComb'></div>
+                     <div class="button">
+                        <input id="number" data-slider-id="blueSlider" type="text" data-provide="slider" data-slider-ticks="[0,1]" data-slider-ticks-labels='["0","1"]' data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="0"data-slider-tooltip="hide">
+                    </div>
                 </div>
                 <div class="col-xs-4">
-                    <h1>Correlation</h1>
+                    <h1>Combinatorics</h1>
                     <hr>
-                    <p>Correlation is a measure of the linear relationship between two variables. It is defined for a sample as the following and takes value between +1 and −1 inclusive:</p>
-                    $$r = \dfrac{s_{xy}}{\sqrt{s_{xx}}\sqrt{s_{yy}}}$$
-                    <p>It can also be understood as the cosine of the angle formed by the ordinary least square line detrmined in both variable dimensions.  Explore this concept through Edgar Anderson's famous <a href="https://en.wikipedia.org/wiki/Iris_flower_data_set">Iris flower dataset</a>.</p>
-                    <ol>
-                        <li>
-                            <p>Check which species to investigate.</p>
-                            <form id="data_corr">
-                                <label class="checkbox-inline"><input type="checkbox" name="correlation" value="setosa">setosa</label>
-                                <label class="checkbox-inline"><input type="checkbox" name="correlation" value="versicolor">versicolor</label>
-                                <label class="checkbox-inline"><input type="checkbox" name="correlation" value="virginica">virginica</label>
-                            </form>
-                        </li>
-    <!--                     <div id='fileInputCorr' class="fileinput fileinput-new input-group" data-provides="fileinput">
-                          <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
-                          <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file</span><span class="fileinput-exists">Change</span><input id='fileCorr' type="file" name="..."></span>
-                        </div> -->
-                        <li>
-                            <p>Click on a cell of the correlation matrix to visualize the relationship between these traits.</p>
-                        </li>
-                    </ol>
-                    <table id="table_corr" class="table table-bordered">
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <tbody>
-                            <tr>
-                                <td></td>
-                                <td>Sepal Length</td>
-                                <td>Sepal Width</td>
-                                <td>Petal Length</td>
-                                <td>Petal Width</td>
-                            </tr>
-                            <tr>
-                                <td>Sepal Length</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>Sepal Width</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>Petal Length</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>Petal Width</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <p>Combinatorics is a branch of mathematics concerned with counting sequences and sets of objects.  For example imagine we have a bag of uniquely colored marbles and I ask you to pick some number of the marbles at random without replacement. How many different sequences (permutations) of the marbles are there? How many different sets (combinations)?  Choose a size below representing the number of marbles in the bag. Then using the slider on the left visualize the number of permutations and combinations of marbles.</p>
+                    <div>
+<!--                       <select class="selectpicker" id="sizeComb">
+                        <option data-content="<div id='balls_1'></div>">1</option>
+                        <option data-content="<div id='balls_2'></div>">2</option>
+                        <option data-content="<div id='balls_3'></div>">3</option>
+                        <option data-content="<div id='balls_4'></div>">4</option>
+                      </select> -->
+                      <select class="form-control" id="sizeComb">
+                        <option data-content="<div id='balls_1'></div>">1</option>
+                        <option data-content="<div id='balls_2'></div>">2</option>
+                        <option data-content="<div id='balls_3'></div>">3</option>
+                        <option data-content="<div id='balls_4'></div>">4</option>
+                      </select>
+                    </div>
+                    <label class="radio-inline"><input type="radio" name="radioComb" checked="checked" value=false>Permutation</label>
+                    <label class="radio-inline"><input type="radio" name="radioComb" value=true>Combination</label>
+                    <div class='explanationComb'>
+                        <p>Permutations represent unique orderings of objects in a set.  We can determine the exact number of permutations with the following formula:</p>
+                        $$P(n,r) = \dfrac{n!}{(n-r)!}$$
+                        <p>\(n\) represents the total number of objects to pick from and \(r\) represents the number of objects being chosen.</p>
+                    </div>
+                    <div class='explanationComb' style='display:none'>
+                        <p>Combinations represent unique combinations of objects in a set.  We can determine the exact number of combinations with the following formula:</p>
+                        $$C(n,r) = \dfrac{n!}{r!(n-r)!}$$
+                        <p>\(n\) represents the total number of objects to pick from and \(r\) represents the number of objects being chosen.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,6 +203,7 @@
             </a>
         </div>
     </section>
+
 
     <!-- Contact Section -->
     <section id="third" class="third-section">
@@ -435,6 +335,13 @@
 
     <!-- Off Canvas Menu JavaScript -->
     <script src="../js/jasny-bootstrap.min.js"></script>
+
+    <!-- Slider JavaScript -->
+    <!-- Don't forget to include JS and CSS for libraries you import! -->
+    <script src="../js/bootstrap-slider.min.js"></script>
+
+    <!-- Select JavaScript -->
+    <script src="../js/bootstrap-select.min.js"></script>
 
     <!-- jstat -->
     <script src="../js/jstat.min.js"></script>
