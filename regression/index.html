@@ -61,7 +61,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand page-scroll" href="#page-top">Linear Regression</a>
+            <a class="navbar-brand page-scroll" href="#page-top">Runtime Analysis</a>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
@@ -71,13 +71,13 @@
                         <a class="page-scroll" href="#page-top"></a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="#first">Ordinary Least Squares</a>
+                        <a class="page-scroll" href="#first">Big Oh Notation</a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="#second">Correlation</a>
+                        <a class="page-scroll" href="#second">Recursive Runtimes</a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="#third">Analysis of Variance</a>
+                        <a class="page-scroll" href="#third">Expected Runtimes</a>
                     </li>
                 </ul>
             </div>
@@ -91,27 +91,27 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12">
-                    <h1>Algorithmic Runtimes</h1>
-                    <p class="text-center">In order to choose the right algorithm for a problem, computer scientists must have some way to estimate how much time the algorithm will take. That inspired the creation of the big Oh notation system of measuring algorithmic runtimes. Loosely speaking, if we say that an algorithm runs in O(f(n)) time, we mean that in the worst case scenario our algorithm's runtime will be at most some constant multiple of f(n), where n is our input size and f is some mathematical function, and that this constant multiple rule always holds beyond a certain point. Here we have three visualizations: for big Oh comparison, recursive runtimes, and expected runtimes. </p>
+                    <h1>Runtime Analysis</h1>
+                    <p class="text-center">In order to choose the right algorithm for a problem, computer scientists must be able to estimate how long an algorithm will take to run. Here we discuss three important concepts in algorithmic analysis: big Oh notation, recursive runtimes, and expected runtimes. </p>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xs-4">
                     <a class="page-scroll" href="#first">
                         <div class="icon" id="linearRegression_img"></div>
-                        <h3>Ordinary Least Square</h3>
+                        <h3>Big Oh Notation</h3>
                     </a>
                 </div>
                 <div class="col-xs-4">
                     <a class="page-scroll" href="#second">
                         <div class="icon" id="correlation_img"></div>
-                        <h3>Correlation</h3>
+                        <h3>Recursive Runtimes</h3>
                     </a>
                 </div>
                 <div class="col-xs-4">
                     <a class="page-scroll" href="#third">
                         <div class="icon" id="anova_img"></div>
-                        <h3>Analysis of Variance</h3>
+                        <h3>Expected Runtimes</h3>
                     </a>
                 </div>
             </div>
@@ -132,15 +132,7 @@
             <div class="col-xs-4">
                 <h1>Big Oh Notation</h1>
                 <hr>
-                <p> Here's a description of big Oh notation and what it stands for, as well as what the visualization means. </p>
-                <div id="dieWrapper">
-                    <div id="die"></div>
-                    <div id="dieButtons">
-                        <div class="btn btn-default" id="rollOne">Roll the Die</div>
-                        <div class="btn btn-default" id="rollHundred">Roll 100 times</div>
-                    </div>
-                </div>
-                <p>Change the theoretical probability of the die to see how that changes the average and expected value.</p>
+                <p> To gauge algorithmic runtimes, computer scientists invented the big Oh notation system of measuring algorithmic runtimes. Loosely speaking, if we say that an algorithm runs in O(f(n)) time, we mean that in the worst case scenario our algorithm's runtime will be at most some constant multiple of f(n), where n is our input size and f is some mathematical function, and that this constant multiple rule always holds beyond a certain point. In the plot to the left, notice that the green plots seem to have a similar shape to one another and similarly the blue plots seem to have a similar shape, but the shapes are different between colors. That's because the blue algorithms, merge sort and quicksort, would be classified in the big Oh notation sysystem as O(nlogn) algorithms, while the green algorithms, bubble sort and insertion sort, would be classified as O(n^2) algorithms but not O(nlog n) algorithms. Try hovering over the graph to see what this looks like numerically.</p>
                 <div id="barDie"></div>
             </div>
         </div>
@@ -159,20 +151,16 @@
                 <div class="col-xs-8">
                      <div id='svgComb'></div>
                      <div class="button">
+                        <input id="number2" data-slider-id="greenSlider" type="text" data-provide="slider" data-slider-ticks="[0,1]" data-slider-ticks-labels='["0","1"]' data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="0"data-slider-tooltip="hide">
                         <input id="number" data-slider-id="blueSlider" type="text" data-provide="slider" data-slider-ticks="[0,1]" data-slider-ticks-labels='["0","1"]' data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="0"data-slider-tooltip="hide">
                     </div>
                 </div>
                 <div class="col-xs-4">
                     <h1>Recursive Runtimes</h1>
                     <hr>
-                    <p>Finding the runtime of an algorithm such as "find the minimum of an unsorted array" is straightforward: we check every element from front to back, and in the worst case, the minimum is at the very end, so the runtime is at most a constant multiple of the input size, i.e. O(n).  How do we measure the runtimes of more complicated algorithms, in particular recursive algorithms? For that purpose we have the Master Theorem, which states that if a recursion can be written as T(n) = aT(n/b) + f(n), the runtime can be written in exactly one of three ways. To visually understand how the Master Theorem works, consider the attached diagram. </p>
+                    <p>Finding the runtime of an algorithm such as "find the minimum of an unsorted array" is straightforward: we check every element from front to back, and in the worst case, the minimum is at the very end, so the runtime is at most a constant multiple of the input size, i.e. O(n).  How do we measure the runtimes of more complicated algorithms, in particular recursive algorithms? For that purpose we have the Master Theorem, which states that if a recursion can be written as $$T(n) = \color{green}{a}T(n/\color{blue}{b}) + \color{orange}{f(n)}$$ the runtime can be written in exactly one of three ways. To visually understand how the Master Theorem works, consider the attached diagram. </p>
+                    <!--
                     <div>
-<!--                       <select class="selectpicker" id="sizeComb">
-                        <option data-content="<div id='balls_1'></div>">1</option>
-                        <option data-content="<div id='balls_2'></div>">2</option>
-                        <option data-content="<div id='balls_3'></div>">3</option>
-                        <option data-content="<div id='balls_4'></div>">4</option>
-                      </select> -->
                       <select class="form-control" id="sizeComb">
                         <option data-content="<div id='balls_1'></div>">1</option>
                         <option data-content="<div id='balls_2'></div>">2</option>
@@ -180,17 +168,14 @@
                         <option data-content="<div id='balls_4'></div>">4</option>
                       </select>
                     </div>
-                    <label class="radio-inline"><input type="radio" name="radioComb" checked="checked" value=false>Permutation</label>
-                    <label class="radio-inline"><input type="radio" name="radioComb" value=true>Combination</label>
-                    <div class='explanationComb'>
-                        <p>Permutations represent unique orderings of objects in a set.  We can determine the exact number of permutations with the following formula:</p>
-                        $$P(n,r) = \dfrac{n!}{(n-r)!}$$
-                        <p>\(n\) represents the total number of objects to pick from and \(r\) represents the number of objects being chosen.</p>
-                    </div>
+                    -->
+                    <label class="radio-inline"><input type="radio" name="radioComb" value=true>$$\color{orange}{O(n)}$$</label>
+                    <label class="radio-inline"><input type="radio" name="radioComb" checked="checked" value=false>$$\color{orange}{O(n^2)}$$</label>
                     <div class='explanationComb' style='display:none'>
-                        <p>Combinations represent unique combinations of objects in a set.  We can determine the exact number of combinations with the following formula:</p>
-                        $$C(n,r) = \dfrac{n!}{r!(n-r)!}$$
-                        <p>\(n\) represents the total number of objects to pick from and \(r\) represents the number of objects being chosen.</p>
+                        <p>O(n) time work at each recursive level is a fairly common paradigm. Examples of such algorithms include merge sort and quicksort. It assumes that somehow we must traverse the entire input before we can proceed to the next part of the algorithm.
+                    </div>
+                    <div class='explanationComb'>
+                        <p>This category occurs when we need quadratic time at each recursive level in order to fully process our input. Examples of such algorithms include matrix multiplication and Strassen's Algorithm. 
                     </div>
                 </div>
             </div>

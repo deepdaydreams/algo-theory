@@ -19,20 +19,26 @@
 	flex-direction: column;
 }
 
-#expected {
+#bubble {
 	fill: none;
 	stroke:	#00d0a1;
 	stroke-width: 2px;
 }
-#actual {
+#insert {
 	fill: none;
-	stroke:	#64bdff;
+	stroke:	#00dfaf;
 	stroke-width: 2px;
 }
 
-#test {
+#merge {
 	fill: none;
-	stroke:	#64bdee;
+	stroke: #64aaff;
+	stroke-width: 2px;
+}
+
+#quick {
+	fill: none;
+	stroke:	#64bdff;
 	stroke-width: 2px;
 }
 
@@ -50,17 +56,21 @@
 	fill: black;
 }
 
-#avgFocus {
+#bubbleFocus {
 	color: #00d0a1;
 	font-size: bold;
 }
 
-#expFocus {
-	color: #64bdff;
+#insertFocus {
+	color:#00dfaf;
 }
 
-#testFocus {
-	color: #64bdee;
+#mergeFocus {
+	color: #64aaff;
+}
+
+#quickFocus {
+	color: #64bdff;
 }
 
 #focusLine {
@@ -69,20 +79,26 @@
 	stroke-width: 1px;
 }
 
-#expectedCircle {
-	fill: #64bdff;
-	stroke: white;
-	stroke-width: 2px;
-}
-
-#testCircle {
-	fill: #64bdee;
-	stroke: white;
-	stroke-width: 2px;
-}
-
-#averageCircle {
+#bubbleCircle {
 	fill: #00d0a1;
+	stroke: white;
+	stroke-width: 2px;
+}
+
+#insertCircle {
+	fill:#00dfaf;
+	stroke: white;
+	stroke-width: 2px;
+}
+
+#mergeCircle {
+	fill: #64aaff;
+	stroke: white;
+	stroke-width: 2px;
+}
+
+#quickCircle {
+	fill: #64bdff;
 	stroke: white;
 	stroke-width: 2px;
 }
