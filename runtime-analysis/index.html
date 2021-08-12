@@ -31,7 +31,7 @@
     <link href="../css/main.css" rel="stylesheet">
 
     <!-- Visualization CSS -->
-    <link href="./regression.css" rel="stylesheet">
+    <link href="./runtime-analysis.css" rel="stylesheet">
 
     <!-- MathJax JS -->
     <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
@@ -50,7 +50,7 @@
         <li><a href="../graph-traversal/index.html">Graph Traversal</a></li>
         <li><a href="../recursion/index.html">Recursion</a></li>
         <li><a href="../sorting-algorithms/index.html">Sorting Algorithms</a></li>
-        <li class="active"><a href="../regression/index.html">Regression</a></li>
+        <li class="active"><a href="../runtime-analysis/index.html">Runtime Analysis</a></li>
       </ul>
     </nav>
     <!-- Navigation -->
@@ -198,8 +198,8 @@
                     <p>Worst case analysis is fantastic at guaranteeing our algorithm will always run at some minimum speed. However, sometimes considering average runtime yields much more insight into how fast an algorithm will actually take to run. In the accompanying ilustration, we have a classic use case for expected runtimes, namely hash tables. A hash table is a data structure which maps keys to values, and allows for more general access schemes. The illustration is implemented using chained hashing, i.e. every key corresponds to a bucket of corresponding values, here implemented as a linked list. By having many possible buckets and a good hash function to assign keys, we reduce the average amount of time per operation assuming random assignment. Try pressing the "Insert random key" and "Delete random key" to get a better feel for this data structure. Even though in the worst case we may end up with very time-consuming arrangements, i.e. keys all hashed to the same bucket, the average amount of keys per bucket (the expected value) is low, hence the usefulness of the hash table.</p>
                     <div id="coinWrapper">
                         <div id="coinButtons">
-                            <div class="btn btn-default" id="enqueue" onclick="manualAddToTail()">Enqueue</div>
-                            <div class="btn btn-default" id="dequeue" onclick="manualRemoveElement()">Dequeue</div>
+                            <div class="btn btn-default" id="enqueue" onclick="manualAddToTail()">Insert random key</div>
+                            <div class="btn btn-default" id="dequeue" onclick="manualRemoveElement()">Delete random key</div>
                         </div>
                     </div>
                 </div>
@@ -243,7 +243,7 @@
     <script src="../js/main.js"></script>
 
     <!-- Visualization JavaScript -->
-    <script src="./regression.js"></script>
+    <script src="./runtime-analysis.js"></script>
 
     <!-- Google Analytics -->
     <script>
