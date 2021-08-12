@@ -1,14 +1,14 @@
 //Handles functionality of Regression
 
 $( window ).load(function() {
-  draw_anova();
+  //draw_anova();
   drawComb();
   drawDie();
 });
 
 //Handles Window Resize
 $(window).on("resize", function () {
-  draw_anova();
+  //draw_anova();
   drawComb();
   drawDie();
 });
@@ -725,246 +725,214 @@ function drawComb(){
 
 
 //*******************************************************************************//
-//ANOVA
+//Expected Runtimes (Hash Table) 
 //*******************************************************************************//
 
-// Constants
-var data_anova = [],
-    sf_anova = 0.05,
-    color_anova = ['#FF9B3C', '#00D0A2', '#64BCFF', '#FF4A3C', '#FFFF00', 
-                   '#7272FF', '#55D733', '#1263D2', '#FF0080', '#A1FF00',
-                   '#FF1300', '#03899C', '#FFC500', '#2419B2', '#4169E1'];
-
-// Create SVG element
-var svg_anova = d3.select("#svg_anova").append("svg").attr("display", "inline-block");
-
-// Create scale functions
-var x_scale_anova = d3.scale.ordinal().domain([]),
-    y_scale_anova = d3.scale.linear().domain([]);
-
-// Define axis
-var x_axis_anova = d3.svg.axis().scale(x_scale_anova).orient("bottom"),
-    y_axis_anova = d3.svg.axis().scale(y_scale_anova).orient("left");
-
-// Create axis
-var x_axis_group_anova = svg_anova.append("g").attr("class", "x axis"),
-    y_axis_group_anova = svg_anova.append("g").attr("class", "y axis");
-
-// Add axis titles
-var x_axis_title_anova = svg_anova.append("text").attr("text-anchor", "middle"),                
-    y_axis_title_anova = svg_anova.append("text").attr("text-anchor", "middle");
-
-// Create tool tip
-var tip_anova = d3.tip().attr('class', 'd3-tip').offset([-10, 0]);
-
-// Drag function
-var drag_anova = d3.behavior.drag() 
-    .origin(function(d) { 
-        return {x: d3.select(this).attr("cx"), y: d3.select(this).attr("cy")}; }) 
-    .on('drag', function(d) {
-        var r = parseFloat(d3.select(this).attr("r")),
-            y = Math.max(y_scale_anova.range()[1] + r, 
-                Math.min(y_scale_anova.range()[0] - r, d3.event.y));
-        d.v = y_scale_anova.invert(y);
-        tip_anova.show(d,this);
-        calc_statistic_anova(); })
-
-// Add data points to plot
-function add_data_anova(data) {
-  // extract data
-  data_anova = data.reduce(function(a, b) {
-    for (var key in b) {
-      a.push({'t':key, 'v': +b[key]});
+var LinkedList = function (){
+  this.head = null;
+  this.tail = null;
+};
+LinkedList.prototype.addToTail = function(value){
+  var node = this.makeNode(value);
+  if (!this.head){ this.head = node; }
+  if (this.tail){ this.tail.next = node; }
+  this.tail = node;
+}
+LinkedList.prototype.removeHead = function(){
+  if (this.head){
+    var currentHeadValue = this.head.value;
+    if (this.head.next){
+      this.head = this.head.next;
+    } else {
+      this.head = null;
+      this.tail = null;
     }
-    return a;
-  }, []);
-  // update groups
-  var keys = d3.keys(data[0])
-  // update x axis
-  x_scale_anova.domain(keys)
-  x_axis_anova.ticks(keys.length);
-  x_axis_group_anova.call(x_axis_anova);
-  // update y axis
-  var min = d3.min(data, function(d) { return d3.min(d3.values(d), function(d) {return +d; });} );
-  var max = d3.max(data, function(d) { return d3.max(d3.values(d), function(d) {return +d; });} );
-  var offset = (max - min)*sf_anova;
-  y_scale_anova.domain([min - offset, max + offset]);
-  y_axis_anova.ticks(5);
-  y_axis_group_anova.call(y_axis_anova);
-  // update titles
-  x_axis_title_anova.text();
-  y_axis_title_anova.text();
-  // update tool tip
-  tip_anova.html(function(d,i) {
-    return '<strong>Treatment: </strong>' + d.t + '<br>' +
-           '<strong>Value: </strong>' + round(d.v,2); });
-  // compute color map
-  var color = {};
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    color[key] = color_anova[i];
+    return currentHeadValue
+  } else {
+    console.log('No head to remove.');
   }
-  // add mean line
-  svg_anova.selectAll("line.mean").remove();
-  svg_anova.selectAll("line.mean")
-    .data(keys)
-    .enter()
-    .append("line")
-    .attr("stroke-width", 2)
-    .attr("stroke", function(d) { return color[d]; })
-    .attr("class", "mean");
-  // add new cirlces
-  svg_anova.selectAll("circle").remove();
-  svg_anova.selectAll("circle")
-    .data(data_anova)
-    .enter()
-    .append("circle")
-    .attr("r", 5)
-    .attr("fill", function(d) { return color[d.t]; })
-    .style("cursor","pointer")
-    .call(drag_anova)
-    .on('mousedown', function(d){tip_anova.show(d,this)})
-    .on('mouseover', function(d){tip_anova.show(d,this)})
-    .on('mouseout', tip_anova.hide);
-
-  $('#svg_anova').parent().on('mouseup', tip_anova.hide);
-  // calculate statistics
-  calc_statistic_anova();
 }
 
-
-// Compute statistics
-function calc_statistic_anova() {
-  // check there is data
-  if (!data_anova.length) {
-    return;
-  };
-  // update circle positions
-  svg_anova.selectAll("circle")
-          .attr("cx", function(d) { return x_scale_anova(d.t) + x_scale_anova.rangeBand()/2; })
-          .attr("cy", function(d) { return y_scale_anova(d.v); });
-  // degrees of freedom
-  var df_t = -1,
-      df_e = 0,
-      treatments = {}
-      data = [];
-  for (var i = 0; i < data_anova.length; i++) {
-    if (treatments[data_anova[i].t]) {
-      df_e += 1;
-      treatments[data_anova[i].t].push(data_anova[i].v);
-    } else {
-      df_t += 1;
-      treatments[data_anova[i].t] = [data_anova[i].v];
-    }
-    data.push(data_anova[i].v);
-  };
-  // square error
-  var ss = square_error(data),
-      ss_e = 0;
-  for (var i in treatments) {
-    ss_e += square_error(treatments[i]);
-  };
-  var ss_t = ss - ss_e;
-  var ms_t = ss_t/df_t;
-  var ms_e = ss_e/df_e;
-  var f = ms_t/ms_e;
-  var p = jStat.ftest(f, df_t, df_e);
-
-  // update table
-  $('#treatment_sse_anova').html(round(ss_t, 2));
-  $('#treatment_df_anova').html(df_t);
-  $('#treatment_ms_anova').html(round(ms_t, 2));
-  $('#treatment_f_anova').html(round(f, 2));
-  $('#treatment_p_anova').html(round(p, 2));
-  $('#error_sse_anova').html(round(ss_e, 2));
-  $('#error_df_anova').html(df_e);
-  $('#error_ms_anova').html(round(ms_e, 2));
-  $('#total_sse_anova').html(round(ss, 2));
-  $('#total_df_anova').html(df_t + df_e);
-
-  // update mean lines
-  svg_anova.selectAll("line.mean")
-          .attr("x1", function(d) { return x_scale_anova(d); })
-          .attr("x2", function(d) { return x_scale_anova(d) + x_scale_anova.rangeBand(); })
-          .attr("y1", function(d) { return y_scale_anova(average(treatments[d])); })
-          .attr("y2", function(d) { return y_scale_anova(average(treatments[d])); });
-
-}
-
-function average(data) {
-  sum = data.reduce(function(a, b){ return a + b; }, 0);
-  return sum/data.length;
-}
-
-function square_error(data) {
-  mean = average(data);
-  error = data.reduce(function(a, b){ return a + Math.pow((b - mean),2); }, 0);
-  return error;
-}
-
-
-// handle links
-$("#distribution a").on('click', function(){
-  curr_dist = $(this).html();
-  $('#dist_name').val(curr_dist);
-  var dataset = 'data/anova/'+ $(this).attr('value');
-  d3.csv(dataset, function(data){
-    add_data_anova(data);
-  });
-});
-
-
-// Handles anova table highlighting and clicking
-var explanation_anova = ["#square_error_anova","#degree_freedom_anova","#mean_error_anova",
-                         "#f_statistic_anova","#p_value_anova"];
-$("#table_anova").delegate('td','click mouseover mouseleave', function(e) {
-  var currColumn = $(this).index() ? $("#table_anova colgroup").eq($(this).index()) : 0;
-  if (currColumn) {
-    if(e.type == 'mouseover' && !currColumn.hasClass("click") ) {
-      currColumn.addClass("hover");
-    } else if (e.type == 'click') {
-      $(".explanation_anova").css("display","none");
-      if(currColumn.hasClass("click")) {
-        $("#default_anova").css("display","block");
-        currColumn.removeClass("click");
-      } else { 
-        $("colgroup").removeClass("click");
-        currColumn.removeClass("hover");
-        currColumn.addClass("click");
-        $(explanation_anova[$(this).index()-1]).fadeToggle();
+LinkedList.prototype.removeElement = function() {
+  var toRemove = 500;
+  var currentNode = this.head;
+  if (currentNode && currentNode.value > toRemove) {
+    return this.removeHead();
+  }
+  while (currentNode && currentNode.next){
+    if (currentNode.next.value > toRemove) {
+      //remove the node
+      var tempNode = currentNode.next;
+      currentNode.next = currentNode.next.next; 
+      if (this.tail === tempNode) { //If deleting tail, reupdate
+        this.tail = currentNode;
       }
-    } else {
-      currColumn.removeClass("hover");
+      return tempNode;
     }
-  };
-});
+    currentNode = currentNode.next;
+  }
+}
 
-//Draws SVG and resizes based upon window size
-function draw_anova() {
-  var parent = d3.select('#svg_anova'),
-      w = parent.node().clientWidth,
-      h = 400,
-      p = 40;
+LinkedList.prototype.contains = function(value){
+  var currentNode = this.head;
+  while (currentNode && currentNode.value){
+    if (currentNode.value === value) return true;
+    currentNode = currentNode.next;
+  }
+  return false;
+}
 
-  //Update Scale Range
-  x_scale_anova.rangeRoundBands([p, (w - p)], 0.6);
-  y_scale_anova.range([(h - p), p]);
+LinkedList.prototype.makeNode = function(value){
+  var node = {};
+  node.value = value;
+  node.next = null;
+  return node;
+};
+var MAXRADIUS = 30;
+var WIDTH = 960;
+var HEIGHT = 500 - 97;
+var TEXT_PADDING = 8;
+var FONT_SIZE = 14;
+var MARGIN = 24;
+var N_BUCKETS = 8;
+var COLORS = ["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"];
 
-  //Update svg size
-  svg_anova.attr("width", w).attr("height", h).call(tip_anova);
+var linkedLists = [];
+var linkedData = [];
+for (var j = 0; j < N_BUCKETS; j++) {
+  linkedLists.push(new LinkedList());
+  initializeLinkedList(linkedLists[j]);
+  linkedData.push(flattenLinkedList(linkedLists[j]));
+}
 
-  //Update Axis
-  x_axis_group_anova.attr("transform", "translate(0," + (h - p) + ")").call(x_axis_anova);
-  y_axis_group_anova.attr("transform", "translate(" + p + ",0)").call(y_axis_anova);
+var svg = d3.select('#svg_anova').append('svg')
+    .attr('width', WIDTH)
+    .attr('height', HEIGHT)
+  .append('g')
+    .attr('transform', 'translate(' + MARGIN + ',' + MARGIN + ')' )
+    //.style('background-color', '#665A88')
 
-  //Update Axis Labels
-  x_axis_title_anova.attr("transform", "translate("+ (w/2) +","+(h-p/4)+")");
-  y_axis_title_anova.attr("transform", "translate("+ (p/4) +","+(h/2)+")rotate(-90)");
+var BOX_SIZE = 2 * (WIDTH - 2*MARGIN) / (linkedData[0].length + 1);
+var BOX_PORTION_OFFSET = MAXRADIUS*2;
+var MAX_BOX_PORTION = HEIGHT - BOX_PORTION_OFFSET;
 
-  //Update regression table
-  $('#table_anova').css('width',w-2*p);
+for (var j = 0; j < N_BUCKETS; j++) {
+  svg.selectAll('.nodes-circ-' + j).data(linkedData[j], function(d){return d;}).enter()
+    .append('circle')
+      .attr('class', 'nodes-circ-' + j)
+      .attr('r', function(d){return d/25;})
+      .attr('cx', function(d, i){return i * (BOX_SIZE)/2 + BOX_SIZE/2;})
+      .attr('cy', MAXRADIUS * (j + 1))
+      .attr('fill', 'none')
+      .attr('stroke', COLORS[j])
+      .attr('opacity', 0.85)
+      .attr('id', function(d, i){return 'node-' + d;})
+}
 
-  // update statistics
-  calc_statistic_anova();
+function updateViz(){
+  var nodesCirc = [];
+  var maxLen = 0;
+  for (var j = 0; j < N_BUCKETS; j++) {
+    linkedData[j] = flattenLinkedList(linkedLists[j]);
+    nodesCirc.push(svg.selectAll('.nodes-circ-' + j).data(linkedData[j], function(d) {return d;}));
+    maxLen = maxLen > linkedData[j].length ? maxLen : linkedData[j].length;
+  }
+
+  BOX_SIZE = 2 * (WIDTH - 2*MARGIN) / (maxLen + 1);
+  for (var j = 0; j < N_BUCKETS; j++) {
+    // update
+    nodesCirc[j].transition().duration(1000)
+      .attr('cx', function(d, i){return i * (BOX_SIZE)/2 + BOX_SIZE/2;})
+      .attr('id', function(d, i){return 'node-' + d;})
+    //enter
+    nodesCirc[j].enter()
+      .append('circle')
+        .attr('class', 'nodes-circ-' + j)
+        .attr('r', function(d){return 1e-6;})
+        .attr('cx', function(d, i){return i * (BOX_SIZE)/2 + BOX_SIZE/2;})
+        .attr('cy', MAXRADIUS * (j + 1))
+        .attr('fill', 'none')
+        .attr('stroke', COLORS[j])
+        .attr('opacity', 0.85)
+        .attr('id', function(d, i){return 'node-' + d;})
+        .transition()
+        .duration(500)
+        .attr('r', function(d){return d/25;});
+    //exit
+    nodesCirc[j].exit()
+      .transition().duration(1000)
+        .attr('opacity', 0)
+      .remove()
+  }
+}
+
+//because this is a hash table, I will assume that every value is unique
+//Which is valid because of chaining (but we will need to do find every time)
+var endPoint = 500;
+function walkListViz(node, choice) { 
+  //basically walk through the linked list and make each node flash when visited
+  if ((node === null) || node.value > endPoint) { //execute callback
+    var value = linkedLists[choice].removeElement();
+    updateViz();
+    return; //no nodes left
+  }
+  //var cursor = linkedList.head;
+  var nodeCirc = svg.select('#node-' + node.value);
+  //console.log(node.value);
+  nodeCirc
+    .attr('fill', 'white')
+    .transition()
+    .duration(500)
+    .attr('fill', 'green')
+    .transition()
+    .duration(500)
+    .attr('fill', 'white')
+    .each('end', function(d) {
+      walkListViz(node.next, choice);
+    });
+}
+
+function flattenLinkedList(linkedList){
+  var data = [];
+  var cursor = linkedList.head;
+  while (cursor && cursor.value){
+    data.push(cursor.value);
+    cursor = cursor.next;
+  }
+  return data;
+}
+
+function initializeLinkedList(linkedList){
+  var initializeAmount = d3.range(0,11);
+  initializeAmount.forEach(function(){
+    //linkedList.addToTail(Math.round(Math.random()*MAXRADIUS*25));
+  })
+}
+
+function randomLinkedListAction(linkedList){
+  var action = Math.round(Math.random()*2);
+  if (action === 0){
+    manualAddToTail();
+  } else if (action === 1){
+    manualRemoveHead();
+  }
+}
+
+function manualAddToTail(){
+  var value = Math.round(Math.random()*(MAXRADIUS - 1)*25) + 25;
+  //var choice = Math.floor(Math.random() * N_BUCKETS);
+  linkedLists[value % N_BUCKETS].addToTail(value);
+  updateViz();
+}
+
+function manualRemoveHead(){
+  var value = linkedList.removeHead();
+  updateViz();
+}
+
+function manualRemoveElement() {
+  var choice = Math.floor(Math.random() * N_BUCKETS);
+  //remove first element within range
+  walkListViz(linkedLists[choice].head, choice);
 }
 

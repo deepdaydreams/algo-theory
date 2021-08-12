@@ -91,8 +91,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12">
-                    <h1>Linear Regression</h1>
-                    <p class="text-center">Linear regression is an approach for modeling the linear relationship between two variables.</p>
+                    <h1>Algorithmic Runtimes</h1>
+                    <p class="text-center">In order to choose the right algorithm for a problem, computer scientists must have some way to estimate how much time the algorithm will take. That inspired the creation of the big Oh notation system of measuring algorithmic runtimes. Loosely speaking, if we say that an algorithm runs in O(f(n)) time, we mean that in the worst case scenario our algorithm's runtime will be at most some constant multiple of f(n), where n is our input size and f is some mathematical function, and that this constant multiple rule always holds beyond a certain point. Here we have three visualizations: for big Oh comparison, recursive runtimes, and expected runtimes. </p>
                 </div>
             </div>
             <div class="row">
@@ -130,11 +130,9 @@
             <div id="plotDie" class="col-xs-8">
             </div>
             <div class="col-xs-4">
-                <h1>Expectation</h1>
+                <h1>Big Oh Notation</h1>
                 <hr>
-                <p>The expected value of an experiment is the probability-weighted average of all possible values.  It is defined mathematically as the following:</p>
-                $$E[X] = \sum_{x \in X}xP(x)$$
-                <p>The law of large numbers states that the average result from a series of trials will converge to the expected value. Roll the die to see convergence to its expected value.</p>
+                <p> Here's a description of big Oh notation and what it stands for, as well as what the visualization means. </p>
                 <div id="dieWrapper">
                     <div id="die"></div>
                     <div id="dieButtons">
@@ -165,9 +163,9 @@
                     </div>
                 </div>
                 <div class="col-xs-4">
-                    <h1>Combinatorics</h1>
+                    <h1>Recursive Runtimes</h1>
                     <hr>
-                    <p>Combinatorics is a branch of mathematics concerned with counting sequences and sets of objects.  For example imagine we have a bag of uniquely colored marbles and I ask you to pick some number of the marbles at random without replacement. How many different sequences (permutations) of the marbles are there? How many different sets (combinations)?  Choose a size below representing the number of marbles in the bag. Then using the slider on the left visualize the number of permutations and combinations of marbles.</p>
+                    <p>Finding the runtime of an algorithm such as "find the minimum of an unsorted array" is straightforward: we check every element from front to back, and in the worst case, the minimum is at the very end, so the runtime is at most a constant multiple of the input size, i.e. O(n).  How do we measure the runtimes of more complicated algorithms, in particular recursive algorithms? For that purpose we have the Master Theorem, which states that if a recursion can be written as T(n) = aT(n/b) + f(n), the runtime can be written in exactly one of three ways. To visually understand how the Master Theorem works, consider the attached diagram. </p>
                     <div>
 <!--                       <select class="selectpicker" id="sizeComb">
                         <option data-content="<div id='balls_1'></div>">1</option>
@@ -210,111 +208,18 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-4">
-                    <h1>Analysis of Variance</h1>
+                    <h1>Expected Runtimes</h1>
                     <hr>
-                    <p>Analysis of Variance (ANOVA) is a statistical method for testing whether groups of data have the same mean.  ANOVA generalizes the t-test to two or more groups by comparing the sum of square error within and between groups.  Begin by choosing a dataset below or upload your own <i>.csv</i> file.</p>
-                    <ol>
-                        <li>
-                            <p>Choose one of the following datasets to investigate.</p>
-                            <div class="input-group">
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose <span class="caret"></span></button>
-                                    <ul id="distribution" class="dropdown-menu">
-                                        <li class="dropdown-header">Anscombe's Quartet</li>
-                                        <li><a value="anscombe_x.csv">Quartet, X</a></li>
-                                        <li><a value="anscombe_y.csv">Quartet, Y</a></li>
-                                        <li class="dropdown-header">Iris Flower Dataset</li>
-                                        <li><a value="iris_sepal_length.csv">Species, Sepal Length</a></li>
-                                        <li><a value="iris_sepal_width.csv">Species, Sepal Width</a></li>
-                                        <li><a value="iris_petal_length.csv">Species, Petal Length</a></li>
-                                        <li><a value="iris_petal_width.csv">Species, Petal Width</a></li>
-                                        <li class="dropdown-header">Rat Feed Experiment</li>
-                                        <li><a value="ratfeed_diet.csv">Diet, Weight</a></li>
-                                        <li><a value="ratfeed_amount.csv">Amount, Weight</a></li>
-                                    </ul>
-                                </div>
-                                <input id="dist_name" type="text" class="form-control" aria-label="...">
-                            </div>
-                        </li>
-<!--                     <div id='file_input_anova' class="fileinput fileinput-new input-group" data-provides="fileinput">
-                        <div class="form-control" data-trigger="fileinput">
-                            <i class="glyphicon glyphicon-file fileinput-exists"></i> 
-                            <span class="fileinput-filename"></span>
+                    <p>Worst case analysis is fantastic at guaranteeing our algorithm will always run at some minimum speed. However, sometimes considering average runtime yields much more insight into how fast an algorithm will actually take to run. In the accompanying ilustration, we have a classic use case for expected runtimes, namely hash tables. A hash table is a data structure which maps keys to values, and allows for more general access schemes. The illustration is implemented using chained hashing, i.e. every key corresponds to a bucket of corresponding values, here implemented as a linked list. By having many possible buckets and a good hash function to assign keys, we reduce the average amount of time per operation assuming random assignment. Try pressing the "Insert random key" and "Delete random key" to get a better feel for this data structure. Even though in the worst case we may end up with very time-consuming arrangements, i.e. keys all hashed to the same bucket, the average amount of keys per bucket (the expected value) is low, hence the usefulness of the hash table.</p>
+                    <div id="coinWrapper">
+                        <div id="coinButtons">
+                            <div class="btn btn-default" id="enqueue" onclick="manualAddToTail()">Enqueue</div>
+                            <div class="btn btn-default" id="dequeue" onclick="manualRemoveElement()">Dequeue</div>
                         </div>
-                        <span class="input-group-addon btn btn-default btn-file">
-                            <span class="fileinput-new">Select file</span>
-                            <span class="fileinput-exists">Change</span>
-                            <input id='file_anova' type="file" name="...">
-                        </span>
-                    </div> -->
-                        <li>
-                            <p>Drag and drop data points to explore how this affects the result of the ANOVA test.</p>
-                        </li>
-                        <li>
-                            <p>Click on a column of the ANOVA table to learn more about this paramter.</p>
-                        </li>
-                    </ol>
-                    <div id="default_anova" class="explanation_anova">
                     </div>
-                    <div id="square_error_anova" class="explanation_anova" style="display:none">
-                        <p>\(SSE\) is an abbreviation for the sum of squared errors which is the sum of the square residuals. SSE is defined mathematically as the following:</p> 
-                        $$SSE = \sum_{i=1}^{n} \big{(}y_{i} - \bar{y}\big{)}^{2}$$
-                    </div>
-                    <div id="degree_freedom_anova" class="explanation_anova" style="display:none">
-                        <p>\(df\) is an abbreviation for degrees of freedom which is related to the number of data points.  It is defined mathematically as the following:</p>
-                        $$df = n - 1$$
-                    </div>
-                    <div id="mean_error_anova" class="explanation_anova" style="display:none">
-                        <p>\(MSE\) is an abbreviation for mean square error which is the quotient of the sum of square errors and the degrees of freedom.  It is defined mathematically as the following:</p>
-                        $$MSE = \dfrac{SSE}{df}$$
-                    </div>
-                    <div id="f_statistic_anova" class="explanation_anova" style="display:none">
-                        <p>\(F\) is a test statistic which is defined as the following:</p>
-                        $$F = \dfrac{SST/(k-1)}{SSE/(n-k)} \sim f_{k-1,n-k}$$
-                    </div>
-                    <div id="p_value_anova" class="explanation_anova" style="display:none">
-                        <p>\(p\) is the p value which is determined from the F statistic.</p>
-                    </div>   
                 </div>
                 <div class="col-xs-8">
                     <div id="svg_anova"></div>
-                    <table id="table_anova" class="table table-bordered">
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                        <colgroup></colgroup>
-                      <tbody>
-                        <tr>
-                            <td></td>
-                            <td>\(\displaystyle{SSE}\)</td>
-                            <td>\(\displaystyle{df}\)</td>
-                            <td>\(\displaystyle{MS}\)</td>
-                            <td>\(\displaystyle{F}\)</td>
-                            <td>\(\displaystyle{p}\)</td>
-                        </tr>
-                        <tr>
-                            <td>Treatment</td>
-                            <td id="treatment_sse_anova"></td>
-                            <td id="treatment_df_anova"></td>
-                            <td id="treatment_ms_anova"></td>
-                            <td id="treatment_f_anova"></td>
-                            <td id="treatment_p_anova"></td>
-                        </tr>
-                        <tr>
-                            <td>Error</td>
-                            <td id="error_sse_anova"></td>
-                            <td id="error_df_anova"></td>
-                            <td id="error_ms_anova"></td>
-                        </tr>
-                        <tr>
-                            <td>Total</td>
-                            <td id="total_sse_anova"></td>
-                            <td id="total_df_anova"></td>
-                        </tr>
-                      </tbody>
-                    </table>
                 </div>
             </div>
         </div>
