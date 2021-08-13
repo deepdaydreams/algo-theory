@@ -180,92 +180,92 @@ section {
 
 
 #likelihood_img{
-  background-image: url(../img/likelihood.png);
+  background-image: url(../img/queue.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 
 #expectation_img{
-  background-image: url(../img/expectation.png);
+  background-image: url(../img/stack.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #estimation_img{
-  background-image: url(../img/estimation.png);
+  background-image: url(../img/heap.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #setTheory_img{
-  background-image: url(../img/setTheory.png);
+  background-image: url(../img/bfs.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #combinatorics_img{
-  background-image: url(../img/combinatorics.png);
+  background-image: url(../img/dfs.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #conditionalProbability_img{
-  background-image: url(../img/conditionalProbability.png);
+  background-image: url(../img/Dijkstra.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #randomVariable_img{
-  background-image: url(../img/randomVariable.png);
+  background-image: url(../img/recursiveFractal.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #discreteContinuous_img{
-  background-image: url(../img/discreteContinuous.png);
+  background-image: url(../img/recursiveTree.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #centralLimitTheorem_img{
-  background-image: url(../img/centralLimitTheorem.png);
+  background-image: url(../img/dynamicProgramming.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #confidenceInterval_img{
-  background-image: url(../img/confidenceInterval.png);
+  background-image: url(../img/quickSort.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #pval_img{
-  background-image: url(../img/pval.png);
+  background-image: url(../img/mergeSort.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #hypothesisTesting_img{
-  background-image: url(../img/hypothesisTesting.png);
+  background-image: url(../img/insertionSort.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #linearRegression_img{
-  background-image: url(../img/linearRegression.png);
+  background-image: url(../img/bigOh.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #correlation_img{
-  background-image: url(../img/correlation.png);
+  background-image: url(../img/masterTheorem.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 #anova_img{
-  background-image: url(../img/anova.png);
+  background-image: url(../img/expectation.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }

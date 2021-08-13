@@ -309,7 +309,8 @@ function updateOld(source) {
 
   nodeEnter.append("circle")
       .attr("r", 1e-6)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+    .style("fill", function(d) { return d._children ? "lightsteelblue": colorrange(d.depth + 1); })
+    .style("stroke", function(d) { return d._children ? "steelblue": colorrange(d.depth + 1); });
 
       //.attr("y", function(d) { return d.children || d._children ? -10 : 10; })
       //.attr("dx", "-.3em")
@@ -327,9 +328,11 @@ function updateOld(source) {
 
   nodeUpdate.select("circle")
       .attr("r", 15)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+    .style("fill", function(d) { return d._children ? "lightsteelblue": colorrange(d.depth + 1); })
+    .style("stroke", function(d) { return d._children ? "steelblue": colorrange(d.depth + 1); });
 
   nodeUpdate.select("text")
+      .style("fill", "white")
       .style("fill-opacity", 1);
 
   // Transition exiting nodes to the parent's new position.
