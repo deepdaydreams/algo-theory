@@ -228,10 +228,13 @@ var i = 0,
 // declares a tree layout and assigns the size
 var treemap = d3.tree().size([height, width]);
 
+var heap = [{}];
+
 // Assigns parent, children, height, depth
 root = d3.hierarchy(treeData, function(d) { return d.children; });
 root.x0 = height / 2;
 root.y0 = 0;
+heap.push(root);
 
 // Collapse after the second level
 //root.children.forEach(collapse);
@@ -389,56 +392,64 @@ function update(source) {
         d.children = d._children;
         d._children = null;
       }
-	//swapWithParent(d);
     update(d);
   }
 
-  function swapWithParent(node) {
-	//swap actual names
-	var temp = node.data.name;
-	node.data.name = node.parent.data.name;
-	node.parent.data.name = temp;
-	//animate swap
-	svg.selectAll('#node' + node.parent.id)
-		  .transition()
-		  .duration(500)
-      	  .attr("transform", function(d) {
-          	return "translate(" + node.x + "," + node.y + ")";
-      	  })
-		  .transition()
-		  .duration(0)
-      	  .attr("transform", function(d) {
-          	return "translate(" + d.x + "," + d.y + ")";
-      	  }).on('end', function(d) {
-			//console.log(this.selectAll('text'));
-			d3.select(this).select('text').text(d.data.name); // = 'foo';
-		  });
-	svg.selectAll('#node' + node.id)
-		  .transition()
-		  .duration(500)
-      	  .attr("transform", function(d) {
-          	return "translate(" + d.parent.x + "," + d.parent.y + ")";
-      	  })
-		  .transition()
-		  .duration(0)
-      	  .attr("transform", function(d) {
-          	return "translate(" + d.x + "," + d.y + ")";
-      	  }).on('end', function(d) {
-			//this.get('text').text = d.name;
-			//console.log(this.selectAll('text'));
-			d3.select(this).select('text').text(d.data.name); 
-		  });
-			
-	//actual data swap
-	//update(d);
-  }
+}
+
+function swapWithParent(node, ind, callback1, callback2) {
+//stop if preconditions met
+if ((node.parent === undefined) || (node.parent === null)) {
+	return; 
+}
+if (ind === 1) return; //too small, should NOT swap
+//swap actual names
+var temp = node.data.name;
+node.data.name = node.parent.data.name;
+node.parent.data.name = temp;
+//animate swap
+svg.selectAll('#node' + node.parent.id)
+	  .transition()
+	  .duration(500)
+	  .attr("transform", function(d) {
+		return "translate(" + node.x + "," + node.y + ")";
+	  })
+	  .transition()
+	  .duration(0)
+	  .attr("transform", function(d) {
+		return "translate(" + d.x + "," + d.y + ")";
+	  }).on('end', function(d) {
+		//console.log(this.selectAll('text'));
+		d3.select(this).select('text').text(d.data.name); // = 'foo';
+		if (callback1) callback1(d, Math.floor(ind/2)); //do something with parent nodes
+	  });
+svg.selectAll('#node' + node.id)
+	  .transition()
+	  .duration(500)
+	  .attr("transform", function(d) {
+		return "translate(" + d.parent.x + "," + d.parent.y + ")";
+	  })
+	  .transition()
+	  .duration(0)
+	  .attr("transform", function(d) {
+		return "translate(" + d.x + "," + d.y + ")";
+	  }).on('end', function(d) {
+		//this.get('text').text = d.name;
+		//console.log(this.selectAll('text'));
+		d3.select(this).select('text').text(d.data.name); 
+		if (callback2) callback2(d, ind); //do something with parent nodes
+	  });
+		
+//actual data swap
+//update(d);
+}
   
 var nNodes = 1;
 function insertChild(d) {
   var selected = d;
    //Adding a new node (as a child) to selected Node (code snippet)
 	var newNode = {
-		name: d.data.name * 30,
+		name: Math.floor(Math.random() * 500),
 		children: []
 	  };
   //Creates a Node from newNode object using d3.hierarchy(.)
@@ -448,7 +459,7 @@ function insertChild(d) {
   newNode.depth = selected.depth + 1;
   newNode.height = selected.height - 1;
   newNode.parent = selected;
-  newNode.id = nNodes;
+  //newNode.id = nNodes;
   nNodes += 1;
 
   //Selected is a node, to which we are adding the new node as a child
@@ -462,40 +473,75 @@ function insertChild(d) {
   selected.children.push(newNode);
   selected.data.children.push(newNode.data);
 
+
   //Update tree
   update(selected);
-  }
-  function removeNode(d)
-	{
-		 //make new set of children
-		 var children = [];
-		 //iterate through the children 
-		 d.parent.children.forEach(function(child){
-		   if (child.id != d.id){
-			 //add to teh child list if target id is not same 
-			 //so that the node target is removed.
-			 children.push(child);
-		   }
-		 });
-		 //set the target parent with new set of children sans the one which is removed
-		 if (children.length === 0) {
-    		children = null;
-		 }
-		 d.parent.children = children;
-		nNodes -= 1;
-		 //redraw the parent since one of its children is removed
-		 update(d.parent)
-	}
+  return newNode;
+}
+
+function removeNode(d) {
+	 //make new set of children
+	 var children = [];
+	 //iterate through the children 
+	 d.parent.children.forEach(function(child){
+	   if (child.id != d.id){
+		 //add to teh child list if target id is not same 
+		 //so that the node target is removed.
+		 children.push(child);
+	   }
+	 });
+	 //set the target parent with new set of children sans the one which is removed
+	 if (children.length === 0) {
+		children = null;
+	 }
+	 d.parent.children = children;
+	nNodes -= 1;
+	 //redraw the parent since one of its children is removed
+	 update(d.parent)
 }
 
 //Code for buttons
 //What would help is to have some internal notion of tree going
 //Alternatively, always go to the rightmost node
 $('#insertHeap').click(function() {
-	var randomNum = Math.floor(Math.random() * 500);
-	var treeData = treemap(root);
-	console.log(treeData);
+	//console.log(heap);
+	var newNode = insertChild(heap[Math.floor((heap.length) / 2)]);
+	heap.push(newNode);
+	var callback1 = function(d, ind) {
+		if ((d.parent) && (d.data.name > d.parent.data.name)) {
+			swapWithParent(d, ind, callback1, null);
+		}
+	};
+	callback1(newNode, heap.length - 1);
+	//console.log(heap);
 });
 
 $('#extractHeap').click(function() {
+	//remove last element
+	if (nNodes === 1) return; //stop at single node left (TODO bug to fix)
+	var lastNode = heap.pop();
+	var nodeNum = lastNode.data.name;
+	removeNode(lastNode);
+	//Put last element as first and swap down
+	heap[1].data.name = nodeNum;
+	var callback2 = function(d, ind) { 
+		//swap with single child if that's all that exists
+		if (!d.children) {
+			return;
+		} else if (d.children.length === 1) {
+			if (d.children[0].data.name < d.data.name) return;
+			swapWithParent(d.children[0], ind * 2, null, callback2);
+		} else {
+		//otherwise choose maximum of two children to swap with
+			if (d.children[0].data.name > d.children[1].data.name) {
+				if (d.children[0].data.name < d.data.name) return;
+				swapWithParent(d.children[0], ind * 2, null, callback2);
+			} else {
+				if (d.children[1].data.name < d.data.name) return;
+				swapWithParent(d.children[1], ind * 2 + 1, null, callback2);
+			}
+		} 
+	}
+	callback2(heap[1], 1);
+	//console.log(heap);
 });
