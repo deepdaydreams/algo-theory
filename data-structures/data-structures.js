@@ -262,7 +262,7 @@ function update(source) {
 
   // Normalize for fixed-depth.
   // Change y so that it reflects heap locations.
-  nodes.forEach(function(d){ d.y = d.depth * 180;});
+  nodes.forEach(function(d){ d.y = d.depth * 450 / (-heap[heap.length - 1].height + 1);});
 
   // ****************** Nodes section ***************************
 
