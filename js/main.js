@@ -35,7 +35,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
                           <div class='modal-content'> \
                             <div class='modal-header'> \
                               <button type='button' class='close' data-dismiss='modal'>&times;</button> \
-                              <h4 class='modal-title'>Seeing Theory is not Mobile Friendly</h4> \
+                              <h4 class='modal-title'>Algo Theory is not Mobile Friendly</h4> \
                             </div> \
                             <div class='modal-body'> \
                               <p class='text-center'>Sorry, some of the visualizations might not be fully functional.</p> \

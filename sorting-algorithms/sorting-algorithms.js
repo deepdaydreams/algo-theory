@@ -1,5 +1,6 @@
 //Handles functionality of Sorting Algorithms
 //Credit to Mike Bostock for much of the code
+//https://bost.ocks.org/mike/algorithms/
 
 function whenBoundsVisible(computeBounds, callback) {
     var id = ".visible-" + ++count,
