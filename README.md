@@ -1,4 +1,4 @@
-# [Algo Theory](http://students.brown.edu/seeing-theory/) 
+# [Algo Theory](https://deepdaydreams.github.io/algo-theory/index.html) 
 
 Algo Theory is a project using a similar visual framework as Seeing Theory by Daniel Kunin. The goal of the project is to make algorithms more accessible to a wider range of students through interactive visualizations.
 
